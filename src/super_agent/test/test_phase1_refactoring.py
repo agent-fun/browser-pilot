@@ -11,9 +11,9 @@ import os
 # Add parent directory to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 
-from examples.super_agent.agent.context_manager import ContextManager
-from examples.super_agent.agent.super_react_agent import SuperReActAgent
-from examples.super_agent.agent.super_config import SuperAgentFactory
+from src.super_agent.agent.context_manager import ContextManager
+from src.super_agent.agent.super_react_agent import SuperReActAgent
+from src.super_agent.agent.super_config import SuperAgentFactory
 from openjiuwen.core.component.common.configs.model_config import ModelConfig
 from openjiuwen.core.utils.llm.base import BaseModelInfo
 

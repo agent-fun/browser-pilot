@@ -3,7 +3,7 @@ import json
 from typing import Dict, Any
 from openai import AsyncOpenAI
 from dotenv import load_dotenv
-from examples.super_agent.tool.logger import bootstrap_logger
+from src.super_agent.tool.logger import bootstrap_logger
 
 load_dotenv()
 

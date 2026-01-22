@@ -5,12 +5,12 @@ from fastmcp import FastMCP
 from mcp.client.stdio import stdio_client
 from mcp import ClientSession, StdioServerParameters  # (already imported in config.py)
 # import your existing tool class
-from examples.super_agent.tool.mcp_servers.auto_browser import *
+from src.super_agent.tool.mcp_servers.auto_browser import *
 import os
 from dotenv import load_dotenv
 
 load_dotenv(verbose=True)
-from examples.super_agent.tool.browser.utils.logger import logger as browser_logger
+from src.super_agent.tool.browser.utils.logger import logger as browser_logger
 
 mcp = FastMCP("browser-use-server")
 

@@ -83,8 +83,8 @@ def build_llm():
 
     # api_key = os.getenv("OPENROUTER_API_KEY")
     # if api_key:
-    #     model = os.getenv("LLM_MODEL", "gpt-4.1-mini")
-    #     base_url = os.getenv("LLM_BASE_URL") or "https://openrouter.ai/api/v1"  # ✅ 默认补上
+    #     model = os.getenv("BROWSER_USE_LLM_MODEL", "gpt-4.1-mini")
+    #     base_url = os.getenv("OPENROUTER_BASE_URL") or "https://openrouter.ai/api/v1"  # ✅ 默认补上
     #     kwargs = {"model": model, "api_key": api_key, "base_url": base_url}
     #     return ChatOpenAI(**kwargs)
 
@@ -102,8 +102,8 @@ def build_llm():
     # 2) OpenAI-compatible (OpenAI / OpenRouter / any OpenAI-style gateway)
     api_key = os.getenv("OPENROUTER_API_KEY")
     if api_key:
-        model = os.getenv("LLM_MODEL", "google/gemini-2.5-pro")  
-        base_url = os.getenv("LLM_BASE_URL")  # 例如 OpenRouter: https://openrouter.ai/api/v1
+        model = os.getenv("BROWSER_USE_LLM_MODEL", "google/gemini-2.5-pro")  
+        base_url = os.getenv("OPENROUTER_BASE_URL")  # 例如 OpenRouter: https://openrouter.ai/api/v1
         kwargs = {"model": model, "api_key": api_key}
         if base_url:
             kwargs["base_url"] = base_url
@@ -117,8 +117,8 @@ def build_llm():
     raise RuntimeError(
         "No LLM credentials found. Set one of:\n"
         "- BROWSER_USE_API_KEY (Browser-Use Cloud)\n"
-        "- OPENAI_API_KEY (+ optional LLM_MODEL / LLM_BASE_URL)\n"
-        "- OPENROUTER_API_KEY (+ optional LLM_MODEL / LLM_BASE_URL)\n"
+        "- OPENAI_API_KEY (+ optional BROWSER_USE_LLM_MODEL / LLM_BASE_URL)\n"
+        "- OPENROUTER_API_KEY (+ optional BROWSER_USE_LLM_MODEL / LLM_BASE_URL)\n"
         "- ANTHROPIC_API_KEY (+ optional ANTHROPIC_MODEL)\n"
     )
 
@@ -516,6 +516,7 @@ class BrowserService:
                 "- You are controlling a real browser.\n"
                 "- Prefer staying in the current tab unless the task explicitly requires opening a new tab.\n"
                 "- Do NOT close the browser.\n"
+                "- When working with online Excel spreadsheets, please carefully check that the cells you enter are in the same column as the target cells. Also, pay attention to the header text columns and align the numbers with each other. Don't modify text cells.\n"
                 "- When done, return the final answer clearly.\n"
             )
             agent_task = task.strip() + safety_hint

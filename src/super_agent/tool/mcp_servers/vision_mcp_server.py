@@ -13,7 +13,7 @@ from google import genai
 from google.genai import types
 from openai import OpenAI
 
-from examples.super_agent.tool.logger import bootstrap_logger
+from src.super_agent.tool.logger import bootstrap_logger
 
 load_dotenv(verbose=True)
 

@@ -39,10 +39,10 @@ from typing import Literal, Optional
 from browser_use.utils import time_execution_sync
 from openai import AsyncOpenAI
 
-from examples.super_agent.tool.browser.local_proxy import PROXY_URL, proxy_env
-from examples.super_agent.tool.browser.tools import Tool, ToolResult
-from examples.super_agent.tool.browser.utils.logger import logger
-from examples.super_agent.tool.browser.action_memory import BrowserSessionContext
+from src.super_agent.tool.browser.local_proxy import PROXY_URL, proxy_env
+from src.super_agent.tool.browser.tools import Tool, ToolResult
+from src.super_agent.tool.browser.utils.logger import logger
+from src.super_agent.tool.browser.action_memory import BrowserSessionContext
 
 Context = TypeVar('Context')
 

@@ -12,14 +12,12 @@ dependencies = [
     #   due to an unsatisfiable portalocker version conflict.
     # - Install them later via pip (see below).
     # =========================================================
-
     # === LLM Providers ===
     "openai>=1.108.0",
     "anthropic>=0.75.0",
     "google-genai>=1.57.0",
     "groq>=1.0.0",
     "ollama>=0.6.1",
-
     # === Agent & Workflow ===
     "langgraph>=0.6.3",
     "langchain-core>=0.3.72",
@@ -28,19 +26,16 @@ dependencies = [
     "langsmith>=0.4.4",
     "mcp>=1.12.2",
     "fastmcp>=2.14.2",
-
     # === Web Framework ===
     "fastapi>=0.128.0",
     "uvicorn>=0.35.0",
     "starlette>=0.47.1",
     "sse-starlette>=2.3.6",
-
     # === Data Processing ===
     "pydantic>=2.11.5",
     "pydantic-settings>=2.10.1",
     "pandas>=2.3.3",
     "numpy>=2.4.0",
-
     # === Document Processing ===
     "pypdf>=6.5.0",
     "pdfplumber>=0.11.9",
@@ -48,29 +43,22 @@ dependencies = [
     "beautifulsoup4>=4.14.3",
     "markdownify>=1.2.2",
     "markitdown>=0.1.4",
-
     # === Knowledge & Search ===
     "wikipedia>=1.4.0",
-
     # === Image & Vision ===
     "pillow>=12.1.0",
-
     # === Tokenizer ===
     "tiktoken>=0.12.0",
     "transformers>=4.57.3",
-
     # === Vector DB ===
     "chromadb>=1.4.0",
-
     # === HTTP & Async ===
     "aiohttp>=3.11.12",
     "httpx>=0.28.1",
     "requests>=2.32.4",
-
     # === Database ===
     "sqlalchemy>=2.0.41",
     "redis>=7.1.0",
-
     # === Utils ===
     "python-dateutil>=2.9.0.post0",
     "python-dotenv>=1.1.1",
@@ -80,6 +68,7 @@ dependencies = [
     "rich>=14.2.0",
     "typer>=0.21.0",
     "mermaid-py>=0.8.0",
+    "google-generativeai==0.8.6",
 ]
 
 [project.optional-dependencies]

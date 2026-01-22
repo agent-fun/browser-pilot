@@ -46,6 +46,14 @@ Any score lower than this requires the agent to run again.
 Any score higher or equal to this does not require the agent to run again as it means the past actions were logically sound enough.
 
 Give me a score, the respective decision, and the reasoning behind that decision, after considering the reflection of the past actions shown below:\n
+Return STRICT JSON only (no extra text):
+{{
+  "score": <number 0-10>,
+  "rerun": <true|false>,
+  "reason": "<short reasoning>",
+  "improvement": "<concrete improvement to the plan if rerun>"
+}}
+Reflection text:\n
 """
 )
 

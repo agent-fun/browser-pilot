@@ -14,7 +14,7 @@ from rich.tree import Tree
 import shutil
 import os
 
-from examples.super_agent.tool.browser.utils.utils import (
+from src.super_agent.tool.browser.utils.utils import (
     escape_code_brackets,
     Singleton
 )

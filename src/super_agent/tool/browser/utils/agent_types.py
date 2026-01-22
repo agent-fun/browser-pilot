@@ -22,7 +22,7 @@ import PIL
 import PIL.Image
 import requests
 
-from examples.super_agent.tool.browser.utils import _is_package_available
+from src.super_agent.tool.browser.utils import _is_package_available
 
 class AgentType:
     """

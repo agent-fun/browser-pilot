@@ -16,7 +16,7 @@ load_dotenv()
 # Ensure both repo root and `examples/` are importable
 CURRENT_DIR = os.path.dirname(__file__)
 REPO_ROOT = os.path.abspath(os.path.join(CURRENT_DIR, "..", "..", ".."))
-EXAMPLES_DIR = os.path.abspath(os.path.join(REPO_ROOT, "examples"))
+EXAMPLES_DIR = os.path.abspath(os.path.join(REPO_ROOT, "src"))
 
 for path in [REPO_ROOT, EXAMPLES_DIR]:
     if path not in sys.path:
@@ -24,7 +24,7 @@ for path in [REPO_ROOT, EXAMPLES_DIR]:
 
 from super_agent.agent.super_react_agent import SuperReActAgent
 from super_agent.agent.super_config import SuperAgentFactory
-from examples.super_agent.agent.prompt_templates_ori import get_main_agent_system_prompt, get_browsing_agent_system_prompt
+from src.super_agent.agent.prompt_templates_ori import get_main_agent_system_prompt, get_browsing_agent_system_prompt
 from openjiuwen.core.component.common.configs.model_config import ModelConfig
 from openjiuwen.core.utils.llm.base import BaseModelInfo
 from openjiuwen.core.utils.tool.function.function import LocalFunction
@@ -38,8 +38,8 @@ from mcp import StdioServerParameters
 import inspect
 
 # Environment configuration
-API_BASE = os.getenv("API_BASE", "https://openrouter.ai/api/v1")
-API_KEY = os.getenv("API_KEY", "your_api_key_here")
+API_BASE = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
+API_KEY = os.getenv("OPENROUTER_API_KEY", "your_api_key_here")
 MODEL_NAME = os.getenv("MODEL_NAME", "anthropic/claude-3.5-sonnet")
 MODEL_PROVIDER = os.getenv("MODEL_PROVIDER", "openrouter")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "your_api_key_here")

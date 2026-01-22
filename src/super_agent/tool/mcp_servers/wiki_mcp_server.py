@@ -8,7 +8,7 @@ from mcp.client.stdio import stdio_client
 from mcp import ClientSession, StdioServerParameters  # (already imported in config.py)
 import wikipedia
 from .utils.smart_request import smart_request, api_request_json
-from examples.super_agent.tool.logger import bootstrap_logger
+from src.super_agent.tool.logger import bootstrap_logger
 from typing import Optional, Dict, Any
 
 # Initialize FastMCP server

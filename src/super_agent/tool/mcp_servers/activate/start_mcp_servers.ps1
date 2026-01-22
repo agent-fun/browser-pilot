@@ -3,19 +3,19 @@ param(
 )
 
 $servers = @(
-    @{ module = "examples.super_agent.tool.mcp_servers.browser_use_mcp_server"; args = "" },
-    @{ module = "examples.super_agent.tool.mcp_servers.python_server"; args = "" },
-    @{ module = "examples.super_agent.tool.mcp_servers.vision_mcp_server"; args = "" },
-    @{ module = "examples.super_agent.tool.mcp_servers.audio_mcp_server"; args = "" },
-    @{ module = "examples.super_agent.tool.mcp_servers.reasoning_mcp_server"; args = "" },
-    @{ module = "examples.super_agent.tool.mcp_servers.reading_mcp_server"; args = "--transport sse" },
-    @{ module = "examples.super_agent.tool.mcp_servers.searching_mcp_server"; args = "" },
-    @{ module = "examples.super_agent.tool.mcp_servers.wiki_mcp_server"; args = "" }
+    @{ module = "src.super_agent.tool.mcp_servers.browser_use_mcp_server"; args = "" },
+    @{ module = "src.super_agent.tool.mcp_servers.python_server"; args = "" },
+    @{ module = "src.super_agent.tool.mcp_servers.vision_mcp_server"; args = "" },
+    @{ module = "src.super_agent.tool.mcp_servers.audio_mcp_server"; args = "" },
+    @{ module = "src.super_agent.tool.mcp_servers.reasoning_mcp_server"; args = "" },
+    @{ module = "src.super_agent.tool.mcp_servers.reading_mcp_server"; args = "--transport sse" },
+    @{ module = "src.super_agent.tool.mcp_servers.searching_mcp_server"; args = "" },
+    @{ module = "src.super_agent.tool.mcp_servers.wiki_mcp_server"; args = "" }
     
 )
 
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot '..\..\..\..\..')
-$toolingDir = Join-Path $repoRoot "examples\super_agent\tool"
+$toolingDir = Join-Path $repoRoot "src\super_agent\tool"
 
 if ($NoEnv) {
     Write-Output "Running in NoEnv mode: using python from current shell (respects active venv if any)"

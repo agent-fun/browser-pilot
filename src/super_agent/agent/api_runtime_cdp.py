@@ -29,14 +29,14 @@ import sys as _sys
 
 _CURRENT_DIR = _Path(__file__).resolve().parents[3]  # .../examples/super_agent/agent -> repo root
 _REPO_ROOT = _CURRENT_DIR
-_EXAMPLES_DIR = _REPO_ROOT / "examples"
+_EXAMPLES_DIR = _REPO_ROOT / "src"
 for _p in (str(_REPO_ROOT), str(_EXAMPLES_DIR)):
     if _p not in _sys.path:
         _sys.path.insert(0, _p)
 
-from examples.super_agent.agent.super_react_agent import SuperReActAgent
-from examples.super_agent.agent.super_config import SuperAgentFactory
-from examples.super_agent.agent.context_manager import ContextManager
+from src.super_agent.agent.super_react_agent import SuperReActAgent
+from src.super_agent.agent.super_config import SuperAgentFactory
+from src.super_agent.agent.context_manager import ContextManager
 from openjiuwen.core.component.common.configs.model_config import ModelConfig
 from openjiuwen.core.utils.llm.base import BaseModelInfo
 from openjiuwen.core.utils.tool.function.function import LocalFunction
@@ -57,8 +57,8 @@ if _env_path.exists():
 AUTO_BROWSER_SSE_URL = os.getenv("AUTO_BROWSER_SSE_URL", "http://127.0.0.1:8930/sse").strip()
 SERVER_NAME = os.getenv("BROWSER_MCP_SERVER_NAME", "browser-use-cdp-server").strip()
 
-API_BASE = os.getenv("API_BASE", "https://openrouter.ai/api/v1").strip()
-API_KEY = os.getenv("API_KEY") or os.getenv("OPENROUTER_API_KEY")
+API_BASE = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1").strip()
+API_KEY = os.getenv("OPENROUTER_API_KEY")
 MODEL_NAME = os.getenv("MODEL_NAME", "anthropic/claude-sonnet-4.5").strip()
 MODEL_PROVIDER = os.getenv("MODEL_PROVIDER", "openrouter").strip()
 
@@ -71,7 +71,7 @@ SESSION_DATA_DIR.mkdir(parents=True, exist_ok=True)
 # -----------------------------
 TOOLING_VENV_DIR = os.getenv(
     "MCP_TOOL_VENV_DIR",
-    os.path.join(str(_REPO_ROOT), "examples", "super_agent", "tool", ".venv-tool"),
+    os.path.join(str(_REPO_ROOT), "src", "super_agent", "tool", ".venv-tool"),
 )
 if os.name == "nt":
     _tooling_python = os.path.join(TOOLING_VENV_DIR, "Scripts", "python.exe")
@@ -107,7 +107,7 @@ MCP_TOOL_GROUPS = {
         "client_type": "stdio",
         "params": StdioServerParameters(
             command=MCP_TOOL_PYTHON,
-            args=["-u", "-m", "examples.super_agent.tool.mcp_servers.reasoning_mcp_server", "--transport", "stdio"],
+            args=["-u", "-m", "src.super_agent.tool.mcp_servers.reasoning_mcp_server", "--transport", "stdio"],
             env=build_tool_env({
                 "ANTHROPIC_API_KEY": os.getenv("ANTHROPIC_API_KEY"),
                 "ANTHROPIC_BASE_URL": os.getenv("ANTHROPIC_BASE_URL"),
@@ -122,7 +122,7 @@ MCP_TOOL_GROUPS = {
         "client_type": "stdio",
         "params": StdioServerParameters(
             command=MCP_TOOL_PYTHON,
-            args=["-u", "-m", "examples.super_agent.tool.mcp_servers.searching_mcp_server", "--transport", "stdio"],
+            args=["-u", "-m", "src.super_agent.tool.mcp_servers.searching_mcp_server", "--transport", "stdio"],
             env=build_tool_env({
                 "SERPER_API_KEY": os.getenv("SERPER_API_KEY"),
                 "JINA_API_KEY": os.getenv("JINA_API_KEY"),
@@ -137,7 +137,7 @@ MCP_TOOL_GROUPS = {
         "client_type": "stdio",
         "params": StdioServerParameters(
             command=MCP_TOOL_PYTHON,
-            args=["-u", "-m", "examples.super_agent.tool.mcp_servers.vision_mcp_server", "--transport", "stdio"],
+            args=["-u", "-m", "src.super_agent.tool.mcp_servers.vision_mcp_server", "--transport", "stdio"],
             env=build_tool_env({
                 "ANTHROPIC_API_KEY": os.getenv("ANTHROPIC_API_KEY"),
                 "ANTHROPIC_BASE_URL": os.getenv("ANTHROPIC_BASE_URL"),
@@ -152,6 +152,27 @@ MCP_TOOL_GROUPS = {
             cwd=MCP_TOOL_CWD,
         ),
     },
+    "tool-doubter": {
+    "server_name": "doubter-mcp-server",
+    "client_type": "stdio",
+    "params": StdioServerParameters(
+        command=MCP_TOOL_PYTHON,  # 建议用你 .venv-tool 的 python，确保依赖一致
+        args=["-u", "-m", "src.super_agent.tool.mcp_servers.doubter"],
+        env=build_tool_env({
+            "OPENROUTER_API_KEY": os.getenv("OPENROUTER_API_KEY"),
+            "OPENROUTER_BASE_URL": os.getenv("OPENROUTER_BASE_URL"),
+            "OPENAI_API_KEY": os.getenv("OPENAI_API_KEY"),
+            "OPENAI_BASE_URL": os.getenv("OPENAI_BASE_URL"),
+            "GEMINI_API_KEY": os.getenv("GEMINI_API_KEY"),
+
+            # 可选：doubter 内部模型控制
+            "DOUBTER_MODEL": os.getenv("DOUBTER_MODEL", "anthropic/claude-sonnet-4.5"),
+            "DOUBTER_SCORE_MODEL": os.getenv("DOUBTER_SCORE_MODEL", "google/gemini-2.5-pro"),
+            "BOUNDARY": os.getenv("BOUNDARY", "7"),
+        }),
+        cwd=MCP_TOOL_CWD,
+    ),
+}
 }
 
 # per session system prompt marker (optional)
@@ -276,7 +297,7 @@ def create_model_config() -> ModelConfig:
         api_key=API_KEY,
         api_base=API_BASE,
         model=MODEL_NAME,
-        timeout=60,
+        timeout=300,
     )
     return ModelConfig(model_provider=MODEL_PROVIDER, model_info=model_info)
 
@@ -577,7 +598,7 @@ async def init_agents_once() -> SuperReActAgent:
         mcp_tools = [t for t in mcp_tools if getattr(t, "name", "") not in BLOCK]
 
         tools = [browser_tool] + mcp_tools
-
+        DOUBTER_TOOL_NAME = "doubter-mcp-server_doubter"
         # 2) 先创建 agent config
         agent_config = SuperAgentFactory.create_main_agent_config(
             agent_id="agent_cdp_api",
@@ -594,12 +615,29 @@ async def init_agents_once() -> SuperReActAgent:
                         "2) Reasoning tools for complex problem solving\n"
                         "3) Searching tools for web search\n"
                         "4) VQA (Vision QA) tools for image understanding\n\n"
-                        "Tool usage rules:\n"
+                        "5) Doubter tool to reflect on your own actions and results, ensuring high-quality outcomes. But only use it ONCE.\n\n"
+                        "Tool usage rules (STRICT):\n"
                         "- When the user needs ANY web interaction (open pages, click, drag, screenshot, extract info), CALL THE TOOL `browser_run_task(task)` EXACTLY ONCE.\n"
                         "- Write a clear step-by-step task in the tool input, including URLs.\n"
                         "- For complex reasoning tasks, use reasoning tools.\n"
                         "- For web search, use searching tools.\n"
                         "- For image/vision questions, use VQA tools.\n"
+                        "- If the user request requires ANY web interaction, you MUST call browser_run_task(task, session_id) once to execute.\n"
+                        "- Before you provide the final answer to end the agent, you MUST call {DOUBTER_TOOL_NAME}(history) ONCE and ONLY ONCE to reflect on:\n"
+                        "  (a) the plan you executed,\n"
+                        "  (b) the tool output you got,\n"
+                        "  (c) whether steps are missing or illogical.\n"
+                        "- Build 'history' as a compact plain text with sections:\n"
+                        "[USER_QUESTION]\n"
+                        "[PLAN_EXECUTED]\n"
+                        "[TOOL_CALL_INPUT]\n"
+                        "[TOOL_OUTPUT] (paste key JSON fields only; do NOT dump huge logs)\n"
+                        "[WHAT_WE_LEARNED]\n"
+                        "- If the doubter result indicates score < BOUNDARY or says rerun is needed:\n"
+                        "  1) Provide a improved plan (what to change),\n"
+                        "  2) Rerun the whole agent with the improved plan (same session_id), but ONLY RERUN IT ONCE\n"
+                        "  3) If {DOUBTER_TOOL_NAME} doesn't deem its necessary to re-run or you already have re-runned, just end the agent and provide the final answer.\n"
+                        "- Do at most ONE rerun. If still low score, answer with best effort and explain uncertainty.\n"
                         "- In CDP mode, DO NOT close the user's existing tabs. Use session_new() (new tab) by default.\n"
                         "Return final answer succinctly.\n"
                         f"Current time: {datetime.now().isoformat()}\n"

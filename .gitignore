@@ -19,12 +19,13 @@ venv/
 .venv/
 env/
 ENV/
+.super_agent_sessions/
+.openjiuwen_agent_core/
 
 # =========================
 # Build / distribution
 # =========================
 build/
-dist/
 *.egg-info/
 
 # =========================

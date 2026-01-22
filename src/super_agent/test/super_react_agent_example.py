@@ -16,7 +16,7 @@ load_dotenv()
 # Ensure both repo root and `examples/` are importable
 CURRENT_DIR = os.path.dirname(__file__)
 REPO_ROOT = os.path.abspath(os.path.join(CURRENT_DIR, "..", "..", ".."))
-EXAMPLES_DIR = os.path.abspath(os.path.join(REPO_ROOT, "examples"))
+EXAMPLES_DIR = os.path.abspath(os.path.join(REPO_ROOT, "src"))
 
 for path in [REPO_ROOT, EXAMPLES_DIR]:
     if path not in sys.path:
@@ -33,8 +33,8 @@ from super_agent.agent.utils import setup_file_logging
 
 
 # Environment configuration
-API_BASE = os.getenv("API_BASE", "https://openrouter.ai/api/v1")
-API_KEY = os.getenv("API_KEY", "your_api_key_here")
+API_BASE = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
+API_KEY = os.getenv("OPENROUTER_API_KEY", "your_api_key_here")
 MODEL_NAME = os.getenv("MODEL_NAME", "anthropic/claude-3.5-sonnet")
 MODEL_PROVIDER = os.getenv("MODEL_PROVIDER", "openrouter")
 os.environ.setdefault("LLM_SSL_VERIFY", "false")

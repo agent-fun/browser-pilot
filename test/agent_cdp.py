@@ -21,14 +21,14 @@ import sys
 
 CURRENT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = CURRENT_DIR            # ✅ agent_cdp.py 在 repo 根目录时
-EXAMPLES_DIR = REPO_ROOT / "examples"
+EXAMPLES_DIR = REPO_ROOT / "src"
 
 for p in (str(REPO_ROOT), str(EXAMPLES_DIR)):
     if p not in sys.path:
         sys.path.insert(0, p)
 
-from examples.super_agent.agent.super_react_agent import SuperReActAgent
-from examples.super_agent.agent.super_config import SuperAgentFactory
+from src.super_agent.agent.super_react_agent import SuperReActAgent
+from src.super_agent.agent.super_config import SuperAgentFactory
 from openjiuwen.core.component.common.configs.model_config import ModelConfig
 from openjiuwen.core.utils.llm.base import BaseModelInfo
 from openjiuwen.core.utils.tool.function.function import LocalFunction

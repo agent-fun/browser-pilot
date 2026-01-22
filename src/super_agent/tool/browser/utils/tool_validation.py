@@ -2,7 +2,7 @@ import ast
 import builtins
 from itertools import zip_longest
 
-from examples.super_agent.tool.browser.utils.utils import BASE_BUILTIN_MODULES, get_source, is_valid_name
+from src.super_agent.tool.browser.utils.utils import BASE_BUILTIN_MODULES, get_source, is_valid_name
 
 
 _BUILTIN_NAMES = set(vars(builtins))

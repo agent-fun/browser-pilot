@@ -10,18 +10,18 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, Optional, Tuple, List, Any
 
-from examples.super_agent.agent.super_react_agent import SuperReActAgent
-from examples.super_agent.agent.super_config import SuperAgentFactory
-from examples.super_agent.agent.prompt_templates_ori import (
+from src.super_agent.agent.super_react_agent import SuperReActAgent
+from src.super_agent.agent.super_config import SuperAgentFactory
+from src.super_agent.agent.prompt_templates_ori import (
     get_main_agent_system_prompt,
     get_browsing_agent_system_prompt,
     get_coding_agent_system_prompt,
 )
-from examples.super_agent.agent.context_manager import ContextManager
+from src.super_agent.agent.context_manager import ContextManager
 from openjiuwen.core.runner.runner import Runner
 
 # 复用你 test 脚本里的 bootstrap（保持你现在能跑的方式）
-from examples.super_agent.test.super_react_agent_test_run import (
+from src.super_agent.test.super_react_agent_test_run import (
     create_model_config,
     ensure_autobrowser_sse_server,
     AUTO_BROWSER_TRANSPORT,

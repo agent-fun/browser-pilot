@@ -14,16 +14,16 @@ import sys, socket, time
 os.environ["BROWSER_USE_REUSE"] = "0"
 
 from browser_use import Agent, Browser, BrowserConfig
-from examples.super_agent.tool.browser import Controller
-from examples.super_agent.tool.browser.action_memory import BrowserSessionContext
+from src.super_agent.tool.browser import Controller
+from src.super_agent.tool.browser.action_memory import BrowserSessionContext
 import requests
-from examples.super_agent.tool.logger import bootstrap_logger
+from src.super_agent.tool.logger import bootstrap_logger
 from langchain_openai import ChatOpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
-from examples.super_agent.tool.browser.litellm import LiteLLMModel
+from src.super_agent.tool.browser.litellm import LiteLLMModel
 from openai import AsyncOpenAI
 
-from examples.super_agent.tool.mcp_servers import model_manager
+from src.super_agent.tool.mcp_servers import model_manager
 from pathlib import Path
 from playwright.async_api import TimeoutError as PlaywrightTimeoutError
 from browser_use.browser.context import BrowserContext

@@ -5,15 +5,15 @@
 <h1 align="center">Browser Pilot</h1>
 
 <p align="center">
-  <b>🧠 Next-Gen Browser-Level AI Copilot — Understands Web Semantics, Executes Complex Tasks, Auto-Decides & Acts</b>
+  <b>🧠 新一代浏览器级 AI 助手 —— 理解网页语义、执行复杂任务、自动决策与行动</b>
 </p>
 
 <p align="center">
-  <a href="#-demo-videos">Demo Videos</a> •
-  <a href="#-core-features">Core Features</a> •
-  <a href="#-quick-start">Quick Start</a> •
-  <a href="#-architecture">Architecture</a> •
-  <a href="README.md">中文</a>
+  <a href="#-演示视频">演示视频</a> •
+  <a href="#-核心功能">核心功能</a> •
+  <a href="#-快速开始">快速开始</a> •
+  <a href="#-架构详解">架构详解</a> •
+  <a href="README.en.md">English</a>
 </p>
 
 <p align="center">
@@ -24,278 +24,228 @@
 
 ---
 
-## 💡 Project Overview
+## 💡 项目简介
 
-**Browser Pilot** is an intelligent browser assistant plugin built on the [OpenJiuwen Agent Framework](https://gitcode.com/openJiuwen/agent-core). It not only deeply understands web content but also reasons, plans, and executes based on user intent — acting as a true AI copilot that automatically completes multi-step, cross-page complex tasks.
+**Browser Pilot** 是一款基于 [OpenJiuwen Agent Framework](https://gitcode.com/openJiuwen/agent-core) 构建的**浏览器智能助手插件**。它不仅具备对网页内容的深度理解能力，还能够结合用户意图进行推理、规划与执行，作为真正的 AI 助手，自动完成多步骤、跨页面的复杂任务。
 
-> 🎯 **Tell it what you want to do, and it will think, execute, and even learn from failures.**
+> 🎯 **告诉它你想做什么，它会自己思考、执行、甚至从失败中学习。**
 
-### What Can It Do?
+### 它能做什么？
 
-| 🔍 Smart Q&A | 💼 Office Assistance | 🛒 Complex Tasks | 🔄 Self-Evolution |
+| 🔍 智能问答 | 💼 协助办公 | 🛒 复杂任务 | 🔄 自我演进 |
 |:---:|:---:|:---:|:---:|
-| Direct Q&A on web content | Auto-reply to emails | Watch recipe video → Auto-add ingredients to cart | Auto-reflect on failures |
-| Precise screenshot region recognition | Excel data processing | Cross-app multi-step workflows | Context-based learning optimization |
-| Deep Search | Form filling & submission | Price comparison, booking, ordering | Gets smarter with use |
+| 网页内容直接问答 | 自动回复邮件 | 看菜谱视频 → 自动加购食材 | 失败自动反思 |
+| 截图区域精准识别 | Excel 数据处理 | 跨应用多步骤工作流 | 上下文学习优化 |
+| Deep Search 深度搜索 | 文档填写提交 | 搜价、预订、下单 | 越用越聪明 |
+
+
+## ✨ 核心功能
+
+### 1️⃣ 视觉问答 (VQA)
+
+**让 AI 看懂你看到的一切**
+
+- **网页问答**：打开任意网页，直接向 AI 提问页面内容
+- **截图识别**：框选屏幕任意区域，AI 根据图像内容回答
+- **Deep Search**：复杂问题自动拆解，多轮搜索，深度汇总
+
+### 2️⃣ 智能办公
+
+**把重复劳动交给 AI**
+
+- **邮件处理**：阅读邮件内容，理解上下文，自动撰写专业回复
+- **Excel 处理**：数据清洗、公式计算、图表生成、报表导出
+- **表单填写**：智能识别字段，自动填充并提交
+
+### 3️⃣ 长时程复杂任务
+
+**跨应用、多步骤，一气呵成**
+
+- **场景示例**：观看美食视频/文章 → 提取食材清单 → 打开购物软件 → 自动加入购物车
+- **工作流编排**：自动规划任务步骤，按序执行，异常处理
+- **跨平台协同**：浏览器、本地应用无缝衔接
+
+### 4️⃣ 功能自演进
+
+**越用越聪明的 AI**
+
+- **失败反思**：任务失败时自动分析原因
+- **上下文学习**：基于历史交互优化执行策略
+- **自主修正**：调整方案后重新执行，直到成功
 
 ---
 
-## 🎬 Demo Videos
+## 🚀 快速开始
 
-<!-- Insert your demo videos here -->
+Browser Pilot 由**浏览器插件（前端）** 和 **Agent 服务（后端）** 两部分组成。
 
-| Demo | Description |
-|------|-------------|
-| [🎥 Demo 1: Web Q&A & Screenshot Recognition](#) | Open the plugin, ask questions about web content; select regions for AI to interpret |
-| [🎥 Demo 2: Deep Search](#) | One question, AI automatically searches multiple rounds, summarizes, and provides complete answers |
-| [🎥 Demo 3: Email & Excel Office Tasks](#) | Auto-read emails, compose replies; process Excel data, generate reports |
-| [🎥 Demo 4: Recipe to Shopping Cart](#) | Understand recipe videos/articles, auto-open shopping app, one-click add all ingredients |
-
----
-
-## ✨ Core Features
-
-### 1️⃣ Visual Question Answering (VQA)
-
-**Let AI see everything you see**
-
-- **Web Q&A**: Open any webpage, directly ask AI about page content
-- **Screenshot Recognition**: Select any screen region, AI answers based on image content
-- **Deep Search**: Complex questions auto-decomposed, multi-round search, deep summarization
-
-### 2️⃣ Smart Office
-
-**Let AI handle repetitive work**
-
-- **Email Processing**: Read email content, understand context, auto-compose professional replies
-- **Excel Processing**: Data cleaning, formula calculation, chart generation, report export
-- **Form Filling**: Smart field recognition, auto-fill and submit
-
-### 3️⃣ Long-Duration Complex Tasks
-
-**Cross-app, multi-step, seamless execution**
-
-- **Example Scenario**: Watch recipe video/article → Extract ingredient list → Open shopping app → Auto-add to cart
-- **Workflow Orchestration**: Auto-plan task steps, sequential execution, exception handling
-- **Cross-Platform Coordination**: Seamless connection between browser and local apps
-
-### 4️⃣ Self-Evolution
-
-**AI that gets smarter with use**
-
-- **Failure Reflection**: Auto-analyze reasons when tasks fail
-- **Context Learning**: Optimize execution strategies based on interaction history
-- **Self-Correction**: Adjust approach and retry until success
-
----
-
-## 🚀 Quick Start
-
-Browser Pilot consists of a **Browser Plugin (Frontend)** and an **Agent Service (Backend)**.
-
-### Requirements
+### 环境要求
 
 - Python 3.11+
-- [uv](https://github.com/astral-sh/uv) package manager
+- [uv](https://github.com/astral-sh/uv) 包管理器
 - Node.js 18+
-- Chrome browser
+- Chrome 浏览器
 
 ---
 
-### Backend Installation
+### 后端安装
 
-#### 1. Clone Repository
+#### 1. 克隆仓库
 
 ```bash
 git clone https://github.com/xxxx/browser-pilot.git
 cd browser-pilot
 ```
 
-#### 2. Install Dependencies
+#### 2. 安装依赖
 
 ```bash
-# Install uv (if not already installed)
+# 安装 uv（如果尚未安装）
 # Windows: powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
 # macOS/Linux: curl -LsSf https://astral.sh/uv/install.sh | sh
 uv sync
-# Activate virtual environment
+# 激活虚拟环境
 .\.venv\Scripts\Activate.ps1
-## Install openjiuwen and browser-use
+##安装openjiuwen和browser-use
 uv pip install openjiuwen==0.1.2
 uv pip install browser-use==0.11.2
 
 ```
 
-#### 3. Configure Environment Variables
+#### 3. 配置环境变量
 
-Create `.env` file:
+创建 `.env` 文件：
 
 ```bash
-# Recommended: Use OpenRouter (supports multiple models)
-API_BASE=https://openrouter.ai/api/v1
-API_KEY=your_openrouter_api_key
-MODEL_NAME=anthropic/claude-sonnet-4-20250514
-MODEL_PROVIDER=openrouter
+# === LLM 提供商配置（至少配置一个）===
+
+# 方式一：OpenRouter（推荐，支持多种模型）
+OPENROUTER_API_KEY=your_openrouter_api_key
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1  # 可选，已有默认值
+
+# 方式二：Anthropic 直连
+# ANTHROPIC_API_KEY=your_anthropic_api_key
+# ANTHROPIC_BASE_URL=https://api.anthropic.com  # 可选，已有默认值
+
+# 方式三：OpenAI 直连
+# OPENAI_API_KEY=your_openai_api_key
+# OPENAI_BASE_URL=https://api.openai.com/v1  # 可选，已有默认值
+
+# === 模型配置 ===
+MODEL_NAME=anthropic/claude-sonnet-4-20250514  # 可选，默认 anthropic/claude-sonnet-4.5
+MODEL_PROVIDER=openrouter  # 可选，默认 openrouter
+
+# === 搜索功能（按需配置）===
+# SERPER_API_KEY=your_serper_api_key
+# GOOGLE_API_KEY=your_google_api_key
+# PERPLEXITY_API_KEY=your_perplexity_api_key
+# GEMINI_API_KEY=your_gemini_api_key
+
+# === 浏览器配置 ===
+# BROWSER_USE_CDP_URL=http://127.0.0.1:9222  # 连接远程 Chrome 时配置
+# BROWSER_USE_LLM_MODEL=google/gemini-2.5-pro  # 可选，已有默认值
 ```
 
-#### 4. Start Services
+#### 4. 启动服务
 
+**Windows:**
 ```powershell
-# Activate virtual environment
-.\.venv\Scripts\Activate.ps1    # Windows PowerShell
-# source .venv/bin/activate     # macOS/Linux
-# Start browser tool service
-uv run python .\browser_use_mcp_server_cdp.py --host 127.0.0.1 --port 8930
-# Open new terminal, start Agent API service
-uvicorn examples.super_agent.api.server:app --host 0.0.0.0 --port 8000
-
-
+# 启动
+.\start_agent.ps1
 ```
 
----
-
-### Frontend Installation
-
+**macOS:**
 ```bash
-# 1. Enter frontend directory
-git clone https://github.com/xxx/frontend.git
-cd frontend
-# 2. Start Chrome browser as administrator
-.\Start-CdpLanBridge.ps1 -ServerIp 172.20.10.3 -ListenIp 172.20.10.8 -KillChromeFirst  ## If frontend and backend are on different machines
-# If frontend and backend are on the same machine, start as follows:
-# .\browser_start_client.ps1
+./start_agent.sh 
 
 ```
-
-#### Load Plugin into Browser
-
-1. Visit `chrome://extensions/`
-2. Enable "Developer mode" in top right
-3. Click "Load unpacked"
-4. Select `frontend/dist` directory
-5. Open the plugin, click settings and enter http://localhost:8000 in Backend_URL
 
 ---
 
-### Verify Installation
+### 前端安装
 
-1. Ensure backend services (port 8930 + port 8000) are running
-2. Open any webpage
-3. Click Browser Pilot icon in browser toolbar
-4. Enter a question to test if AI responds normally
+#### 打开chrome 浏览器
+**Windows:**
+```powershell
+# 启动
+.\browser_start_client.ps1
+```
+
+**macOS:**
+```bash
+./browser_start_client.sh
+```
+
+#### 加载插件到浏览器
+
+1. 访问 `chrome://extensions/`
+2. 开启右上角「开发者模式」
+3. 点击「加载已解压的扩展程序」
+4. 选择 `./frontend/dist` 目录
+5. 打开插件，点击设置在Backend_URL输入 http://localhost:8000
 
 ---
 
-## 🏗️ Architecture
+### 验证安装
 
-### Overall Architecture
+1. 确保后端服务（8930 端口 + 8000 端口）正常运行
+2. 打开任意网页
+3. 点击浏览器工具栏的 Browser Pilot 图标
+4. 输入问题，测试 AI 是否正常响应
 
-<!-- Insert your architecture diagram here -->
+---
 
-```
-[Architecture Diagram Placeholder - Please insert architecture diagram here]
-```
+## 🏗️ 架构详解
 
-### System Components
+### 整体架构
 
-```
-┌────────────────────────────────────────────────────────────────────────┐
-│                        Browser Plugin (Frontend)                        │
-│  ┌────────────┐  ┌────────────┐  ┌────────────┐  ┌────────────┐       │
-│  │   Web Q&A   │  │ Screenshot  │  │ Deep Search │  │ Task Panel  │       │
-│  │   (VQA)    │  │ Recognition │  │             │  │  Progress   │       │
-│  └─────┬──────┘  └─────┬──────┘  └─────┬──────┘  └─────┬──────┘       │
-└────────┼───────────────┼───────────────┼───────────────┼───────────────┘
-         │               │               │               │
-         ▼               ▼               ▼               ▼
-┌────────────────────────────────────────────────────────────────────────┐
-│                        Agent Service (Backend)                          │
-│  ┌──────────────────────────────────────────────────────────────────┐ │
-│  │                  SuperReActAgent (OpenJiuwen)                     │ │
-│  │    • Intent Understanding  • Task Planning  • Tool Calling       │ │
-│  │    • Reflective Evolution  • Context Management                  │ │
-│  └──────────────────────────────────────────────────────────────────┘ │
-│                                  │                                     │
-│    ┌─────────────────────────────┼─────────────────────────────┐      │
-│    │                             │                             │      │
-│    ▼                             ▼                             ▼      │
-│  ┌──────────────┐  ┌──────────────────────────┐  ┌──────────────┐    │
-│  │  🔍 Smart Q&A │  │      💼 Office Assist     │  │ 🛒 Complex    │    │
-│  │  • Web Under- │  │  • Email Read/Reply      │  │   Tasks      │    │
-│  │    standing   │  │  • Excel Processing      │  │ • Cross-app  │    │
-│  │  • Screenshot │  │                          │  │ • Multi-step │    │
-│  │  • Deep Search│  │                          │  │ • Shopping   │    │
-│  └──────────────┘  └──────────────────────────┘  └──────────────┘    │
-│                                  │                                     │
-│    ┌─────────────────────────────┴─────────────────────────────┐      │
-│    │                      🔄 Self-Evolution Engine               │      │
-│    │     Failure Reflection → Context Learning → Strategy       │      │
-│    │              Adjustment → Re-execution                     │      │
-│    └───────────────────────────────────────────────────────────┘      │
-│                                  │                                     │
-│  ┌───────────┬───────────┬───────────┬───────────┬───────────┐       │
-│  │ Browser   │  Visual   │  Search   │  Office   │   Code    │       │
-│  │ Control   │  Under-   │  Engine   │  Suite    │ Execution │       │
-│  │ (CDP)     │ standing  │           │(Email/    │ (Python)  │       │
-│  │           │  (VLM)    │           │  Excel)   │           │       │
-│  └───────────┴───────────┴───────────┴───────────┴───────────┘       │
-└────────────────────────────────────────────────────────────────────────┘
-```
-
-### Browser Pilot
-
-| Layer | Component | Description |
-|-------|-----------|-------------|
-| **Agent Layer** | SuperReActAgent | Enhanced ReAct loop + Self-evolution capability |
-| **Vision Layer** | VisionModule | Web understanding, screenshot recognition, OCR |
-| **Context Layer** | ContextManager | Long conversation summarization, overflow handling |
-| **Tool Layer** | MCP Servers | Browser, search, office, code execution |
-| **Interface Layer** | REST API | Frontend-backend communication, SSE streaming |
+<p align="center">
+  <img src="assets/架构图_zh.svg" alt="Architecture" width="800">
+</p>
 
 
-### Technical Highlights
+### 技术亮点
 
-| Feature | Description |
-|---------|-------------|
-| **Visual Understanding** | Multimodal LLM supports web/screenshot content understanding |
-| **ReAct Reasoning** | Think → Act → Observe, up to 20 iterations |
-| **Self-Evolution** | Reflect on failures, auto-adjust strategy and retry |
-| **Long Task Support** | Cross-app, multi-step task orchestration and execution |
-| **Streaming Response** | Real-time display of AI thinking process and execution progress |
+| 特点 | 描述 |
+|------|------|
+| **SuperReAct** | 增强的 ReAct 循环，思考 → 行动 → 观察，支持多轮迭代推理 |
+| **Browser Use** | 浏览器自动化操作，跨页面、多步骤任务执行 |
+| **反思演进** | 失败后自动反思原因，调整策略重试，越用越聪明 |
+| **多模态视觉理解** | 支持网页内容、截图区域的视觉理解与问答 |
 
-### Supported Models
+### 支持的模型
 
-Recommended to use **[OpenRouter](https://openrouter.ai/)** for unified access (supports 100+ models), while also compatible with direct API connections to various providers:
+推荐使用 **[OpenRouter](https://openrouter.ai/)** 统一接入（支持 100+ 模型），同时也兼容各厂商 API 直连：
 
-| Provider | Models |
-|----------|--------|
-| **Anthropic** | Claude Sonnet 4 (Recommended), Claude Opus 4 |
+| 提供商 | 模型 |
+|--------|------|
+| **Anthropic** | Claude Sonnet 4 (推荐), Claude Opus 4 |
 | **OpenAI** | GPT-4o, O3, O3-mini |
 | **Google** | Gemini 2.0 Pro/Flash |
-| **Others** | Qwen, DeepSeek, Llama, etc. |
+| **其他** | Qwen, DeepSeek, Llama 等 |
 
 ---
 
-## 🤝 Contributing
+## 🤝 参与贡献
 
-Contributions are welcome!
+欢迎参与贡献！
 
-1. Fork this repository
-2. Create feature branch (`git checkout -b feature/new-feature`)
-3. Commit changes (`git commit -m 'Add new feature'`)
-4. Push branch (`git push origin feature/new-feature`)
-5. Submit Pull Request
+1. Fork 本仓库
+2. 创建功能分支 (`git checkout -b feature/new-feature`)
+3. 提交更改 (`git commit -m 'Add new feature'`)
+4. 推送分支 (`git push origin feature/new-feature`)
+5. 提交 Pull Request
 
-## 📄 License
+## 📄 许可证
 
 [Apache License 2.0](LICENSE)
 
-## 🔗 Related Links
+## 🔗 相关链接
 
-- [OpenJiuwen Agent Framework](https://gitcode.com/openJiuwen/agent-core) - Underlying Agent framework
+- [OpenJiuwen Agent Framework](https://gitcode.com/openJiuwen/agent-core) - 底层 Agent 框架
 
 ---
 
 <p align="center">
-  <b>⭐ If you find this helpful, please give us a Star!</b>
+  <b>⭐ 如果觉得有帮助，请给个 Star！</b>
 </p>

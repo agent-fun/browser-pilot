@@ -24,7 +24,7 @@ if [[ -z "${REPO_ROOT:-}" ]]; then
     REPO_ROOT="$(cd "$SCRIPT_DIR/../../../../../" && pwd)"
     
     # Verify this is actually the repo root by checking for mcp_servers directory
-    if [[ ! -d "$REPO_ROOT/examples/super_agent/tool/mcp_servers" ]]; then
+    if [[ ! -d "$REPO_ROOT/src/super_agent/tool/mcp_servers" ]]; then
         echo "Warning: mcp_servers directory not found at calculated repo root: $REPO_ROOT" >&2
         echo "Trying alternative detection method..." >&2
         
@@ -33,7 +33,7 @@ if [[ -z "${REPO_ROOT:-}" ]]; then
         found=false
         for i in {1..10}; do
             current_dir="$(cd "$current_dir/.." && pwd)"
-            if [[ -d "$current_dir/examples/super_agent/tool/mcp_servers" ]]; then
+            if [[ -d "$current_dir/src/super_agent/tool/mcp_servers" ]]; then
                 REPO_ROOT="$current_dir"
                 found=true
                 break
@@ -41,7 +41,7 @@ if [[ -z "${REPO_ROOT:-}" ]]; then
         done
         
         if [[ "$found" != "true" ]]; then
-            echo "Error: Could not find repository root (looking for examples/super_agent/tool/mcp_servers/ directory)" >&2
+            echo "Error: Could not find repository root (looking for src/super_agent/tool/mcp_servers/ directory)" >&2
             echo "Please set REPO_ROOT environment variable manually" >&2
             exit 1
         fi
@@ -54,8 +54,8 @@ if [[ ! -d "$REPO_ROOT" ]]; then
     exit 1
 fi
 
-if [[ ! -d "$REPO_ROOT/examples/super_agent/tool/mcp_servers" ]]; then
-    echo "Error: mcp_servers directory not found at: $REPO_ROOT/examples/super_agent/tool/mcp_servers" >&2
+if [[ ! -d "$REPO_ROOT/src/super_agent/tool/mcp_servers" ]]; then
+    echo "Error: mcp_servers directory not found at: $REPO_ROOT/src/super_agent/tool/mcp_servers" >&2
     echo "This doesn't appear to be the correct repository root." >&2
     exit 1
 fi
@@ -64,17 +64,17 @@ echo "Detected repository root: $REPO_ROOT"
 
 # 定义 servers（module + args）
 servers=(
-    "examples.super_agent.tool.mcp_servers.browser_use_mcp_server|"
-    "examples.super_agent.tool.mcp_servers.python_server|"
-    "examples.super_agent.tool.mcp_servers.vision_mcp_server|"
-    "examples.super_agent.tool.mcp_servers.audio_mcp_server|"
-    "examples.super_agent.tool.mcp_servers.reasoning_mcp_server|"
-    "examples.super_agent.tool.mcp_servers.reading_mcp_server|--transport sse"
-    "examples.super_agent.tool.mcp_servers.searching_mcp_server|"
-    "examples.super_agent.tool.mcp_servers.wiki_mcp_server|"
+    "src.super_agent.tool.mcp_servers.browser_use_mcp_server|"
+    "src.super_agent.tool.mcp_servers.python_server|"
+    "src.super_agent.tool.mcp_servers.vision_mcp_server|"
+    "src.super_agent.tool.mcp_servers.audio_mcp_server|"
+    "src.super_agent.tool.mcp_servers.reasoning_mcp_server|"
+    "src.super_agent.tool.mcp_servers.reading_mcp_server|--transport sse"
+    "src.super_agent.tool.mcp_servers.searching_mcp_server|"
+    "src.super_agent.tool.mcp_servers.wiki_mcp_server|"
 )
 
-TOOLING_DIR="$REPO_ROOT/examples/super_agent/tool"
+TOOLING_DIR="$REPO_ROOT/src/super_agent/tool"
 
 if [[ "$NO_ENV" == "true" ]]; then
     echo "Running in NoEnv mode: using python from current shell (respects active venv if any)"

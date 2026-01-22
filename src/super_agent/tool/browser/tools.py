@@ -39,7 +39,7 @@ from huggingface_hub import (
     metadata_update,
 )
 
-from examples.super_agent.tool.browser.utils.utils import (
+from src.super_agent.tool.browser.utils.utils import (
     # _convert_type_hints_to_json_schema,
     get_imports,
     get_json_schema,
@@ -49,14 +49,14 @@ from examples.super_agent.tool.browser.utils.utils import (
     is_valid_name,
 )
 
-from examples.super_agent.tool.browser.utils.tool_validation import MethodChecker, validate_tool_attributes
+from src.super_agent.tool.browser.utils.tool_validation import MethodChecker, validate_tool_attributes
 
 
 if TYPE_CHECKING:
     import mcp
 
 
-from examples.super_agent.tool.browser.logger import logger
+from src.super_agent.tool.browser.logger import logger
 
 
 def validate_after_init(cls):

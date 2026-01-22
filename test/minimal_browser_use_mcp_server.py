@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from fastmcp import FastMCP
 
 # 复用你们项目里现有的 browse() 实现
-from examples.super_agent.tool.mcp_servers.auto_browser import browse
+from src.super_agent.tool.mcp_servers.auto_browser import browse
 
 load_dotenv(verbose=True)
 

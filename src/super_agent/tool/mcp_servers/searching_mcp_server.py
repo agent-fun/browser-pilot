@@ -12,7 +12,7 @@ import wikipedia
 import asyncio
 import httpx 
 from .utils.smart_request import smart_request, api_request_json
-from examples.super_agent.tool.logger import bootstrap_logger
+from src.super_agent.tool.logger import bootstrap_logger
 from typing import List, Optional, Dict, Any
 from .utils.perplexity import PerplexitySearch
 from .utils.query_enhancer import enhance_query_for_perplexity
@@ -21,7 +21,7 @@ from dataclasses import dataclass, field
 import time
 
 SERPER_API_KEY = os.environ.get("SERPER_API_KEY", "")
-JINA_API_KEY = os.environ.get("JINA_API_KEY", "")
+# JINA_API_KEY = os.environ.get("JINA_API_KEY", "")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 PERPLEXITY_API_KEY = os.environ.get("PERPLEXITY_API_KEY", "")
 # Initialize FastMCP server
@@ -42,44 +42,44 @@ class SearchResult:
 
 
 
-async def jina_deep_search(query: str, timeout: float = DEFAULT_ENGINE_TIMEOUT):
-    url = "https://deepsearch.jina.ai/v1/chat/completions"
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {JINA_API_KEY}"
-    }
+# async def jina_deep_search(query: str, timeout: float = DEFAULT_ENGINE_TIMEOUT):
+#     url = "https://deepsearch.jina.ai/v1/chat/completions"
+#     headers = {
+#         "Content-Type": "application/json",
+#         "Authorization": f"Bearer {JINA_API_KEY}"
+#     }
 
-    data = {
-        "model": "jina-deepsearch-v1",
-        "messages": [
-            {
-                "role": "user",
-                "content": query
-            }
-        ],
-        "stream": False,
-        "reasoning_effort": "low",
-        "team_size": 4,
-        "no_direct_answer": True,
+#     data = {
+#         "model": "jina-deepsearch-v1",
+#         "messages": [
+#             {
+#                 "role": "user",
+#                 "content": query
+#             }
+#         ],
+#         "stream": False,
+#         "reasoning_effort": "low",
+#         "team_size": 4,
+#         "no_direct_answer": True,
 
-    }
-    try:
-        async with httpx.AsyncClient(timeout=timeout) as client:
-            response = await client.post(url, headers=headers, json=data)
-        response.raise_for_status()
-        return SearchResult("JINA", query, response.json()['choices'][0]['message']['content'], True)
+#     }
+#     try:
+#         async with httpx.AsyncClient(timeout=timeout) as client:
+#             response = await client.post(url, headers=headers, json=data)
+#         response.raise_for_status()
+#         return SearchResult("JINA", query, response.json()['choices'][0]['message']['content'], True)
 
-    # httpx raises TimeoutException; catching httpx.Timeout (a config class) triggers
-    # "catching classes that do not inherit from BaseException" in some environments.
-    except httpx.TimeoutException:
-        return SearchResult("JINA", query, "Request timed out", False)
-    except httpx.RequestError as e:
-        return SearchResult("JINA", query, f"Request failed: {e}", False)
-    except asyncio.CancelledError:
-        logger.warning("JINA deep search cancelled")
-        raise
-    except Exception as e:
-        return SearchResult("JINA", query, f"Unexpected error: {e}", False)
+#     # httpx raises TimeoutException; catching httpx.Timeout (a config class) triggers
+#     # "catching classes that do not inherit from BaseException" in some environments.
+#     except httpx.TimeoutException:
+#         return SearchResult("JINA", query, "Request timed out", False)
+#     except httpx.RequestError as e:
+#         return SearchResult("JINA", query, f"Request failed: {e}", False)
+#     except asyncio.CancelledError:
+#         logger.warning("JINA deep search cancelled")
+#         raise
+#     except Exception as e:
+#         return SearchResult("JINA", query, f"Unexpected error: {e}", False)
 
 
 async def perplexity_search(
@@ -316,7 +316,8 @@ async def general_search(
     if not query:
         return "[ERROR]: Search query cannot be empty."
     
-    engines = [perplexity_search, jina_deep_search]
+    # engines = [perplexity_search, jina_deep_search]
+    engines = [perplexity_search]
     logger.info(f"🔍 General search called - Query: {query[:100]}..., Engines: {engines}")
     start_time = time.time()
     

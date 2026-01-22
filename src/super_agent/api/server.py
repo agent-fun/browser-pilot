@@ -10,15 +10,15 @@ from fastapi.responses import StreamingResponse
 
 CURRENT_DIR = os.path.dirname(__file__)
 REPO_ROOT = os.path.abspath(os.path.join(CURRENT_DIR, "..", "..", ".."))
-EXAMPLES_DIR = os.path.join(REPO_ROOT, "examples")
+EXAMPLES_DIR = os.path.join(REPO_ROOT, "src")
 
 for p in [REPO_ROOT, EXAMPLES_DIR]:
     if p not in sys.path:
         sys.path.insert(0, p)
 
-from examples.super_agent.api.settings import Settings
-from examples.super_agent.api.schemas import ChatRequest, ResetRequest
-from examples.super_agent.agent.api_runtime_cdp import init_agents_once, run_turn_stream, reset_session, shutdown_runner
+from src.super_agent.api.settings import Settings
+from src.super_agent.api.schemas import ChatRequest, ResetRequest
+from src.super_agent.agent.api_runtime_cdp import init_agents_once, run_turn_stream, reset_session, shutdown_runner
 # from examples.super_agent.agent.api_runtime import init_agents_once, run_turn_stream, reset_session, shutdown_runner
 
 

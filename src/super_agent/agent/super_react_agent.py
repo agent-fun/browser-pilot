@@ -24,11 +24,11 @@ from openjiuwen.core.utils.llm.messages import AIMessage, ToolMessage, HumanMess
 from openjiuwen.core.utils.tool.param import Param
 from openjiuwen.core.utils.tool.function.function import LocalFunction
 
-from examples.super_agent.agent.super_config import SuperAgentConfig
-from examples.super_agent.agent.context_manager import ContextManager
-from examples.super_agent.agent.tool_call_handler import ToolCallHandler
-from examples.super_agent.agent.o3_handler import O3Handler
-from examples.super_agent.llm.openrouter_llm import OpenRouterLLM, ContextLimitError
+from src.super_agent.agent.super_config import SuperAgentConfig
+from src.super_agent.agent.context_manager import ContextManager
+from src.super_agent.agent.tool_call_handler import ToolCallHandler
+from src.super_agent.agent.o3_handler import O3Handler
+from src.super_agent.llm.openrouter_llm import OpenRouterLLM, ContextLimitError
 
 from openjiuwen.core.utils.tool.mcp.base import ToolServerConfig
 from openjiuwen.core.runner.runner import Runner, resource_mgr

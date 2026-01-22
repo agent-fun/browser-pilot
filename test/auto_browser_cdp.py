@@ -36,9 +36,9 @@ except Exception:
     from browser_use.llm import ChatOpenAI  # type: ignore
 
 # --- your repo imports (keep your existing behavior) ---
-from examples.super_agent.tool.browser import Controller
-from examples.super_agent.tool.browser.action_memory import BrowserSessionContext
-from examples.super_agent.tool.logger import bootstrap_logger
+from src.super_agent.tool.browser import Controller
+from src.super_agent.tool.browser.action_memory import BrowserSessionContext
+from src.super_agent.tool.logger import bootstrap_logger
 
 logger = bootstrap_logger()
 
