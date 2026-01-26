@@ -152,12 +152,12 @@ MCP_TOOL_GROUPS = {
             cwd=MCP_TOOL_CWD,
         ),
     },
-    "tool-doubter": {
-    "server_name": "doubter-mcp-server",
+    "tool-selfevolution": {
+    "server_name": "selfevolution-mcp-server",
     "client_type": "stdio",
     "params": StdioServerParameters(
-        command=MCP_TOOL_PYTHON,  # 建议用你 .venv-tool 的 python，确保依赖一致
-        args=["-u", "-m", "src.super_agent.tool.mcp_servers.doubter"],
+        command=MCP_TOOL_PYTHON,  
+        args=["-u", "-m", "src.super_agent.tool.mcp_servers.selfevolution"],
         env=build_tool_env({
             "OPENROUTER_API_KEY": os.getenv("OPENROUTER_API_KEY"),
             "OPENROUTER_BASE_URL": os.getenv("OPENROUTER_BASE_URL"),
@@ -165,7 +165,6 @@ MCP_TOOL_GROUPS = {
             "OPENAI_BASE_URL": os.getenv("OPENAI_BASE_URL"),
             "GEMINI_API_KEY": os.getenv("GEMINI_API_KEY"),
 
-            # 可选：doubter 内部模型控制
             "DOUBTER_MODEL": os.getenv("DOUBTER_MODEL", "anthropic/claude-sonnet-4.5"),
             "DOUBTER_SCORE_MODEL": os.getenv("DOUBTER_SCORE_MODEL", "google/gemini-2.5-pro"),
             "BOUNDARY": os.getenv("BOUNDARY", "7"),
@@ -598,7 +597,7 @@ async def init_agents_once() -> SuperReActAgent:
         mcp_tools = [t for t in mcp_tools if getattr(t, "name", "") not in BLOCK]
 
         tools = [browser_tool] + mcp_tools
-        DOUBTER_TOOL_NAME = "doubter-mcp-server_doubter"
+        DOUBTER_TOOL_NAME = "selfevolution-mcp-server_selfevolution"
         # 2) 先创建 agent config
         agent_config = SuperAgentFactory.create_main_agent_config(
             agent_id="agent_cdp_api",
@@ -615,8 +614,9 @@ async def init_agents_once() -> SuperReActAgent:
                         "2) Reasoning tools for complex problem solving\n"
                         "3) Searching tools for web search\n"
                         "4) VQA (Vision QA) tools for image understanding\n\n"
-                        "5) Doubter tool to reflect on your own actions and results, ensuring high-quality outcomes. But only use it ONCE.\n\n"
+                        "5) Selfevolution tool to reflect on your own actions and results, ensuring high-quality outcomes. But only use it ONCE.\n\n"
                         "Tool usage rules (STRICT):\n"
+                        "- Before any tool call, first output a brief numbered plan under a \"#PLAN#\" header (2-5 steps). Do not repeat the plan in the final answer unless asked.\n"
                         "- When the user needs ANY web interaction (open pages, click, drag, screenshot, extract info), CALL THE TOOL `browser_run_task(task)` EXACTLY ONCE.\n"
                         "- Write a clear step-by-step task in the tool input, including URLs.\n"
                         "- For complex reasoning tasks, use reasoning tools.\n"
@@ -633,7 +633,7 @@ async def init_agents_once() -> SuperReActAgent:
                         "[TOOL_CALL_INPUT]\n"
                         "[TOOL_OUTPUT] (paste key JSON fields only; do NOT dump huge logs)\n"
                         "[WHAT_WE_LEARNED]\n"
-                        "- If the doubter result indicates score < BOUNDARY or says rerun is needed:\n"
+                        "- If the selfevolution result indicates score < BOUNDARY or says rerun is needed:\n"
                         "  1) Provide a improved plan (what to change),\n"
                         "  2) Rerun the whole agent with the improved plan (same session_id), but ONLY RERUN IT ONCE\n"
                         "  3) If {DOUBTER_TOOL_NAME} doesn't deem its necessary to re-run or you already have re-runned, just end the agent and provide the final answer.\n"

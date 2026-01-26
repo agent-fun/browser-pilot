@@ -569,6 +569,9 @@ export function useCustomRuntime(initialMessages: ThreadMessage[] = []) {
         let receivedSessionId: string | null = null;
         let isDone = false;
 
+        // Track if we've received streaming tokens (to avoid duplication with assistant_message)
+        let hasReceivedTokens = false;
+
         // Track current executing agent tool for nested sub-tasks
         let currentExecutingAgentTool: string | null = null;
 
@@ -798,10 +801,13 @@ export function useCustomRuntime(initialMessages: ThreadMessage[] = []) {
 
                   // Handle assistant_message event
                   if (eventType === "assistant_message" || parsed.role === "assistant") {
-                    // Extract text content FIRST (before tool calls)
-                    if (parsed.content) {
+                    const hasToolCalls = parsed.tool_calls && Array.isArray(parsed.tool_calls) && parsed.tool_calls.length > 0;
+
+                    // Only add text if we haven't already received streaming tokens (avoids duplication)
+                    // Tokens handle both intermediate reasoning and final answer streaming
+                    if (parsed.content && !hasReceivedTokens) {
                       addText(parsed.content);
-                      
+
                       // Extract task description for agent execution popup
                       if (agentExecution.isActive && !agentExecution.mainTaskDescription) {
                         const description = extractTaskDescription(parsed.content);
@@ -810,18 +816,20 @@ export function useCustomRuntime(initialMessages: ThreadMessage[] = []) {
                           console.log("📝 Frontend: Extracted task description", { description: description.substring(0, 100) });
                         }
                       }
+                    } else if (parsed.content && hasReceivedTokens) {
+                      console.log("📝 Frontend: Skipping text (already received via tokens)");
                     }
 
-                    // Handle tool_calls array in assistant_message (AFTER text)
-                    if (parsed.tool_calls && Array.isArray(parsed.tool_calls)) {
+                    // Handle tool_calls array in assistant_message
+                    if (hasToolCalls) {
                       for (const toolCall of parsed.tool_calls) {
                         const id = toolCall.id || toolCall.tool_call_id || crypto.randomUUID();
                         const toolName = toolCall.function?.name || toolCall.function?.name || toolCall.name || "unknown";
-                        const args = typeof toolCall.function?.arguments === "string" 
-                          ? JSON.parse(toolCall.function.arguments) 
+                        const args = typeof toolCall.function?.arguments === "string"
+                          ? JSON.parse(toolCall.function.arguments)
                           : toolCall.function?.arguments || toolCall.args || {};
                         const argsText = JSON.stringify(args, null, 2);
-                        
+
                         const toolCallPart = addToolCall(id, toolName, args, argsText);
                         console.log("🔧 Frontend: Added tool_call from assistant_message", toolCallPart);
                       }
@@ -848,23 +856,18 @@ export function useCustomRuntime(initialMessages: ThreadMessage[] = []) {
 
                   // Handle assistant_final event
                   if (eventType === "assistant_final" || parsed.result_type) {
-                    // Only replace content if we have a non-empty reply
+                    // Append final reply without discarding earlier plan text
                     if (parsed.reply && parsed.reply.trim()) {
-                      // Keep existing tool calls and only replace text content
-                      // This preserves the tool execution history
-                      const toolCalls = contentParts.filter(part => part.type === "tool-call");
-                      contentParts.length = 0;
-
-                      // Add back tool calls first
-                      contentParts.push(...toolCalls);
-
-                      // Then add the final reply text
                       contentParts.push({ type: "text", text: parsed.reply } as ThreadAssistantMessagePart);
+
+                      const toolCallsCount = contentParts.filter(part => part.type === "tool-call").length;
+                      const existingTextCount = contentParts.filter(part => part.type === "text").length;
 
                       console.log("🎯 Frontend: Received assistant_final with reply", {
                         result_type: parsed.result_type,
                         replyLength: parsed.reply.length,
-                        toolCallsCount: toolCalls.length
+                        toolCallsCount,
+                        existingTextCount
                       });
                     } else {
                       // If no reply, keep all existing content (tool calls and text)
@@ -884,10 +887,32 @@ export function useCustomRuntime(initialMessages: ThreadMessage[] = []) {
                     break;
                   }
 
-                  // Backward compatibility: Handle old format with type field
-                  // Handle token chunks (old format)
-                  if (parsed.type === "token" && parsed.content !== undefined) {
-                    addText(parsed.content || "");
+                  // Handle token streaming events (ChatGPT-style)
+                  if (eventType === "token" || parsed.type === "token") {
+                    const tokenContent = parsed.content || parsed.data?.content || "";
+                    if (tokenContent) {
+                      hasReceivedTokens = true;
+                      addText(tokenContent);
+                    }
+                    continue;
+                  }
+
+                  // Handle final_answer event - clear intermediate text and show only final answer
+                  if (eventType === "final_answer") {
+                    const finalContent = parsed.content || parsed.data?.content || "";
+                    if (finalContent) {
+                      // Remove all text parts (keep tool_calls)
+                      for (let i = contentParts.length - 1; i >= 0; i--) {
+                        if (contentParts[i].type === "text") {
+                          contentParts.splice(i, 1);
+                        }
+                      }
+                      // Add final answer as the only text
+                      contentParts.push({ type: "text", text: finalContent } as ThreadAssistantMessagePart);
+                      hasReceivedTokens = true; // Prevent duplication from assistant_message
+                      console.log("🎯 Frontend: Replaced intermediate text with final answer");
+                    }
+                    continue;
                   }
 
                   // Handle tool_start (old format)

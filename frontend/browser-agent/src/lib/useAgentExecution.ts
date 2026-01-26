@@ -182,28 +182,52 @@ export const useAgentExecution = create<AgentExecutionState>((set, get) => ({
  */
 export function extractTaskDescription(content: string): string | null {
   if (!content) return null;
-  
-  // Look for #PLAN# section
-  const planMatch = content.match(/#PLAN#\s*([\s\S]*?)(?=\n\n|Step \d|$)/i);
-  if (planMatch) {
-    // Extract numbered items from plan
-    const planItems = planMatch[1]
-      .split(/\n/)
-      .filter((line) => /^\d+\./.test(line.trim()))
-      .map((line) => line.trim())
-      .slice(0, 3); // First 3 items
-    
+
+  // Find the PLAN marker first
+  const markerMatch = content.match(/#+\s*PLAN\s*#+/i) || content.match(/\*{1,2}PLAN\*{1,2}/i);
+
+  if (markerMatch) {
+    // Get content after the marker
+    const markerIndex = content.indexOf(markerMatch[0]);
+    const afterMarker = content.substring(markerIndex + markerMatch[0].length);
+
+    // Extract numbered items from the content after the marker
+    const planItems: string[] = [];
+    const lines = afterMarker.split('\n');
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (/^\d+\./.test(trimmed)) {
+        planItems.push(trimmed);
+        if (planItems.length >= 3) break; // First 3 items only
+      } else if (planItems.length > 0 && trimmed === '') {
+        continue; // Allow empty lines
+      } else if (planItems.length > 0 && trimmed !== '') {
+        break; // Non-numbered, non-empty = end of plan
+      }
+    }
+
     if (planItems.length > 0) {
       return planItems.join("\n");
     }
   }
-  
+
+  // Look for leading numbered steps even without a #PLAN# header
+  const headLines = content.split(/\n/).slice(0, 10);
+  const numberedLines = headLines
+    .map((line) => line.trim())
+    .filter((line) => /^#?\d+\./.test(line))
+    .slice(0, 3);
+  if (numberedLines.length > 0) {
+    return numberedLines.join("\n");
+  }
+
   // Fallback: first paragraph (up to first double newline or 200 chars)
   const firstPara = content.split(/\n\n/)[0];
   if (firstPara && firstPara.length > 0) {
     return firstPara.length > 200 ? firstPara.substring(0, 200) + "..." : firstPara;
   }
-  
+
   return null;
 }
 

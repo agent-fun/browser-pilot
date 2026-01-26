@@ -401,10 +401,17 @@ const AssistantMessage: FC = () => {
   const content = useAssistantState((state) => {
     // Extract text content from message parts
     if (!state.message.parts) return "";
-    return state.message.parts
+    const textContent = state.message.parts
       .filter((part) => part.type === "text")
       .map((part) => (part as any).text || "")
       .join("");
+
+    // Debug: log message state
+    console.log("📨 AssistantMessage parts count:", state.message.parts?.length);
+    console.log("📨 AssistantMessage status:", state.message.status?.type);
+    console.log("📨 AssistantMessage text content length:", textContent.length);
+
+    return textContent;
   });
 
   return (

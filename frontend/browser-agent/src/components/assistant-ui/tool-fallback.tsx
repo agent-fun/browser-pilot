@@ -157,10 +157,10 @@ export function AgentExecutionPopup() {
           <CheckIcon className="size-4 text-green-600 dark:text-green-400" />
         )}
         <span className="font-medium text-sm flex-grow">
-          {language === "zh" ? "代理执行中" : "Agent Executing"}
+          {language === "zh" ? "Agent执行中" : "Agent Executing"}
           {currentIteration > 0 && (
             <span className="text-muted-foreground ml-1.5 font-normal">
-              ({language === "zh" ? "迭代" : "iteration"} {currentIteration})
+              ({language === "zh" ? "步骤" : "iteration"} {currentIteration})
             </span>
           )}
         </span>

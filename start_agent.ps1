@@ -21,7 +21,7 @@ Start-Process powershell `
     -ArgumentList "-NoExit", "-Command", "uv run python src/super_agent/tool/mcp_servers/browser_use_mcp_server_cdp.py --host 127.0.0.1 --port 8930"
 
 # 等待 MCP Server 启动
-Write-Host "⏳ Waiting for MCP server to be ready..."
+Write-Host "Waiting for MCP server to be ready..."
 Start-Sleep -Seconds 3
 
 # 3. 启动 Agent API Server（当前窗口）

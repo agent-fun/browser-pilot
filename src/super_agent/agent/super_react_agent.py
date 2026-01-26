@@ -281,7 +281,7 @@ class PlanTracker:
     and appends concise progress snapshots into the agent context.
     """
 
-    _plan_header_pattern = re.compile(r"#PLAN#(?P<plan>.*)", re.IGNORECASE | re.DOTALL)
+    _plan_header_pattern = re.compile(r"#\s*PLAN\s*#(?P<plan>.*)", re.IGNORECASE | re.DOTALL)
     # Accept either "#1." or plain "1." step formats
     _plan_step_pattern = re.compile(r"#?\s*(\d+)\.\s*(.+)")
     _step_reference_pattern = re.compile(r"\bstep[\s#:\-]*?(\d+)", re.IGNORECASE)
@@ -313,8 +313,8 @@ class PlanTracker:
         if plan_changed or status_changed:
             self._write_and_append_context(force_write=True, force_context=True)
 
-        # Only allow plan extraction once, unless the LLM explicitly emits #PLAN#
-        if not self._steps or "#PLAN#" in content.upper():
+        # Only allow plan extraction once, unless the LLM explicitly emits #PLAN# (with optional spaces)
+        if not self._steps or re.search(r"#\s*PLAN\s*#", content, re.IGNORECASE):
             try:
                 if self._extract_plan(content):
                     logger.info("Captured plan from LLM output and initialized todo.md")
@@ -1402,20 +1402,39 @@ class SuperReActAgent(BaseAgent):
             )
             tools = all_tools
 
-        # Call LLM
+        # Call LLM with streaming
         llm = self._get_llm()
         openai_tools = [toolinfo_to_openai_tool(t) for t in tools]
 
-        llm_output = await llm.ainvoke(
+        # Accumulate streamed response
+        full_content = ""
+        final_tool_calls = None
+
+        async for chunk in llm._astream(
             model_name=self._agent_config.model.model_info.model_name,
             messages=messages,
             tools=openai_tools
+        ):
+            # Stream tokens in real-time (for intermediate reasoning visibility)
+            if chunk.content:
+                full_content += chunk.content
+                await self._emit_event("token", {"content": chunk.content})
+
+            # Capture tool calls from final chunk
+            if chunk.tool_calls:
+                final_tool_calls = chunk.tool_calls
+
+        # If this is the final answer (no tool_calls), emit clear_and_replace signal
+        # Frontend will clear intermediate text and show only the final answer
+        if not final_tool_calls and full_content:
+            await self._emit_event("final_answer", {"content": full_content})
+
+        # Build final AIMessage
+        llm_output = AIMessage(
+            role="assistant",
+            content=full_content,
+            tool_calls=final_tool_calls
         )
-        # llm_output = await llm.ainvoke(
-        #     model_name=self._agent_config.model.model_info.model_name,
-        #     messages=messages,
-        #     tools=tools
-        # )
 
         # Save AI message to context
         tool_calls_formatted = self._format_tool_calls_for_message(llm_output.tool_calls)

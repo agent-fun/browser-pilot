@@ -184,14 +184,96 @@ class OpenRouterLLM(BaseModelClient):
         top_p: float = 0.1,
         **kwargs: Any
     ) -> AsyncIterator[AIMessageChunk]:
-        """Async streaming - for future implementation"""
-        # For now, just yield a single chunk from invoke
-        result = await self._ainvoke(model_name, messages, tools, temperature, top_p, **kwargs)
-        yield AIMessageChunk(
-            role="assistant",
-            content=result.content,
-            tool_calls=result.tool_calls
-        )
+        """Async streaming - yields token chunks as they arrive"""
+        try:
+            processed_messages = self._prepare_messages(messages)
+
+            params = {
+                "model": model_name or self.config.model_name,
+                "messages": processed_messages,
+                "temperature": temperature,
+                "max_tokens": self.config.max_tokens,
+                "stream": True,
+                "stream_options": {"include_usage": True},
+            }
+
+            if tools:
+                params["tools"] = self._convert_tools_to_openai_format(tools)
+                logger.debug(f"Added {len(params['tools'])} tools to streaming API call")
+
+            if self.config.openrouter_provider:
+                params["extra_body"] = self._get_provider_config(self.config.openrouter_provider)
+
+            response = await self._client.chat.completions.create(**params)
+
+            # Track accumulated tool calls (they come in deltas)
+            tool_call_accumulators: Dict[int, Dict] = {}
+
+            async for chunk in response:
+                if not chunk.choices:
+                    # Final chunk with usage info
+                    if hasattr(chunk, 'usage') and chunk.usage:
+                        self._update_token_usage(chunk.usage)
+                    continue
+
+                delta = chunk.choices[0].delta
+
+                # Handle tool call deltas
+                if hasattr(delta, 'tool_calls') and delta.tool_calls:
+                    for tc_delta in delta.tool_calls:
+                        idx = tc_delta.index
+                        if idx not in tool_call_accumulators:
+                            tool_call_accumulators[idx] = {
+                                "id": None, "name": "", "arguments": ""
+                            }
+                        acc = tool_call_accumulators[idx]
+                        if tc_delta.id:
+                            acc["id"] = tc_delta.id
+                        if tc_delta.function:
+                            if tc_delta.function.name:
+                                acc["name"] = tc_delta.function.name
+                            if tc_delta.function.arguments:
+                                acc["arguments"] += tc_delta.function.arguments
+
+                # Yield content chunk
+                content = getattr(delta, 'content', None) or ""
+                if content:
+                    yield AIMessageChunk(
+                        role="assistant",
+                        content=content,
+                        tool_calls=None
+                    )
+
+            # Yield final chunk with complete tool calls
+            if tool_call_accumulators:
+                final_tool_calls = [
+                    ToolCall(
+                        id=acc["id"],
+                        type="function",
+                        index=idx,
+                        name=acc["name"],
+                        arguments=acc["arguments"] or "{}"
+                    )
+                    for idx, acc in sorted(tool_call_accumulators.items())
+                ]
+                yield AIMessageChunk(
+                    role="assistant",
+                    content="",
+                    tool_calls=final_tool_calls
+                )
+
+        except Exception as e:
+            error_str = str(e)
+            if any(phrase in error_str.lower() for phrase in [
+                "input is too long",
+                "context limit",
+                "maximum context length"
+            ]):
+                logger.error(f"Context limit exceeded: {error_str}")
+                raise ContextLimitError(f"Context limit exceeded: {error_str}")
+
+            logger.error(f"OpenRouter streaming call failed: {error_str}")
+            raise
 
     def _prepare_messages(self, messages: List[Dict]) -> List[Dict]:
         """Prepare messages with cache control if enabled"""
