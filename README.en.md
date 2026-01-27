@@ -13,7 +13,7 @@
   <a href="#-core-features">Core Features</a> •
   <a href="#-quick-start">Quick Start</a> •
   <a href="#-architecture">Architecture</a> •
-  <a href="README.md">中文</a>
+  <a href="README.zh.md">中文</a>
 </p>
 
 <p align="center">
