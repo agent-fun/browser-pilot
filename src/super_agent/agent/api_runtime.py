@@ -226,7 +226,7 @@ async def init_agents_once() -> Tuple[SuperReActAgent, SuperReActAgent, SuperReA
             enable_o3_hints=True,
             o3_api_key=OPENAI_API_KEY,
             enable_o3_final_answer=True,
-            enable_todo_plan=False,
+            enable_todo_plan=True,
         )
 
         browsing_agent_config = SuperAgentFactory.create_main_agent_config(

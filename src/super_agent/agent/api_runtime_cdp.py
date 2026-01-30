@@ -616,7 +616,7 @@ async def init_agents_once() -> SuperReActAgent:
                         "4) VQA (Vision QA) tools for image understanding\n\n"
                         "5) Selfevolution tool to reflect on your own actions and results, ensuring high-quality outcomes. But only use it ONCE.\n\n"
                         "Tool usage rules (STRICT):\n"
-                        "- Before any tool call, first output a brief numbered plan under a \"#PLAN#\" header (2-5 steps). Do not repeat the plan in the final answer unless asked.\n"
+                        "- Before any tool call, first output a brief numbered plan under a \"#PLAN#\" header (2-5 steps). Each step must map to exactly one tool call (or a no-tool step) and include [tool: TOOL_NAME]. Do not repeat the plan in the final answer unless asked.\n"
                         "- When the user needs ANY web interaction (open pages, click, drag, screenshot, extract info), CALL THE TOOL `browser_run_task(task)` EXACTLY ONCE.\n"
                         "- Write a clear step-by-step task in the tool input, including URLs.\n"
                         "- For complex reasoning tasks, use reasoning tools.\n"
@@ -648,7 +648,7 @@ async def init_agents_once() -> SuperReActAgent:
             max_tool_calls_per_turn=1,
             enable_o3_hints=False,
             enable_o3_final_answer=False,
-            enable_todo_plan=False,
+            enable_todo_plan=True,
         )
 
         # 3) 先创建 agent（使用 CDP 工具）
@@ -833,6 +833,11 @@ async def run_turn_stream(
     # Retrieve last_idx from session context to avoid re-streaming old messages
     last_idx = session_data.get("last_idx", 0)
 
+    # Track whether we're in the middle of streaming tokens
+    # This helps avoid yielding duplicate assistant_message when tokens are being streamed
+    streaming_tokens = False
+    streamed_content_length = 0
+
     try:
         import time
         last_ping = time.monotonic()
@@ -846,16 +851,34 @@ async def run_turn_stream(
             if time.monotonic() - last_ping > 5:
                 yield {"type": "ping", "data": {"ts": datetime.now().isoformat()}}
                 last_ping = time.monotonic()
-            
-            # drain agent events first
+
+            # drain agent events first - yield each event immediately for smooth streaming
+            events_drained = 0
             while True:
                 try:
                     event = event_queue.get_nowait()
-                    yield {"type": event.get("type", "agent_event"), "data": event}
+                    event_type = event.get("type", "agent_event")
+
+                    # Track token streaming state
+                    if event_type == "token":
+                        streaming_tokens = True
+                        token_content = event.get("data", {}).get("content", "")
+                        streamed_content_length += len(token_content)
+                        # Yield token event directly for smooth display
+                        yield {"type": "token", "data": {"content": token_content}}
+                    elif event_type == "final_answer":
+                        # Final answer received - streaming complete
+                        streaming_tokens = False
+                        yield {"type": event_type, "data": event}
+                    else:
+                        yield {"type": event_type, "data": event}
+
+                    events_drained += 1
                 except asyncio.QueueEmpty:
                     break
 
             # stream new messages from history
+            # Skip assistant messages if we just streamed their content as tokens
             hist = agent._context_manager.get_history() or []
             while last_idx < len(hist):
                 msg = hist[last_idx]
@@ -863,6 +886,20 @@ async def run_turn_stream(
                 role = msg.get("role")
 
                 if role == "assistant":
+                    # If we streamed tokens for this message, skip yielding the full message
+                    # to avoid duplicate content on the frontend
+                    msg_content = msg.get("content", "")
+                    has_tool_calls = msg.get("tool_calls") and len(msg.get("tool_calls", [])) > 0
+
+                    if streaming_tokens or (streamed_content_length > 0 and len(msg_content) <= streamed_content_length + 50):
+                        # Reset after skipping one message
+                        if not streaming_tokens:
+                            streamed_content_length = 0
+                        # Even if skipping text content, still yield if there are tool_calls
+                        # so the frontend can display tool execution
+                        if has_tool_calls:
+                            yield {"type": "assistant_message", "data": msg}
+                        continue
                     yield {"type": "assistant_message", "data": msg}
                 elif role == "tool":
                     yield {"type": "tool_message", "data": msg}
@@ -882,7 +919,11 @@ async def run_turn_stream(
                 while True:
                     try:
                         event = event_queue.get_nowait()
-                        yield {"type": event.get("type", "agent_event"), "data": event}
+                        event_type = event.get("type", "agent_event")
+                        if event_type == "token":
+                            yield {"type": "token", "data": {"content": event.get("data", {}).get("content", "")}}
+                        else:
+                            yield {"type": event_type, "data": event}
                     except asyncio.QueueEmpty:
                         break
 
@@ -894,22 +935,26 @@ async def run_turn_stream(
 
                 # Check if agent reported internal error
                 result_type = result.get("result_type", "answer")
-                if result_type == "error":
-                    error_msg = result.get("output", "Unknown error occurred")
-                    print(f"[ERROR] Agent completed with error for session {session_id}: {error_msg}")
-                    yield {"type": "error", "data": {"error": error_msg}}
-                    break
+                summary_output = result.get("output", "")
 
+                # Always emit assistant_final with the summary so the frontend displays it
                 yield {
                     "type": "assistant_final",
                     "data": {
-                        "reply": result.get("output", ""),
+                        "reply": summary_output,
                         "result_type": result_type,
                     },
                 }
+
+                if result_type == "error":
+                    print(f"[ERROR] Agent completed with error for session {session_id}: {summary_output}")
+                    yield {"type": "error", "data": {"error": "Max iterations reached. The agent was unable to complete the task within the allowed number of steps."}}
+
                 break
 
-            await asyncio.sleep(0.15)
+            # Use a much shorter sleep for smoother token streaming
+            # 0.01s = 10ms, allows up to 100 updates per second
+            await asyncio.sleep(0.01)
     finally:
         # Cancel agent task if still running (disconnect or error)
         if not task.done():

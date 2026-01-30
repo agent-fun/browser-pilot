@@ -572,6 +572,15 @@ export function useCustomRuntime(initialMessages: ThreadMessage[] = []) {
         // Track if we've received streaming tokens (to avoid duplication with assistant_message)
         let hasReceivedTokens = false;
 
+        // Buffer tokens until #PLAN# is detected to avoid showing stale/intermediate reasoning
+        let tokenBuffer = "";
+        let planDetected = false;
+        const PLAN_MARKER = "#PLAN#";
+
+        // Typewriter effect: throttle token yields for smoother visual effect
+        let lastTokenYieldTime = 0;
+        const TOKEN_YIELD_INTERVAL_MS = 30; // ~33 characters per second for typewriter effect
+
         // Track current executing agent tool for nested sub-tasks
         let currentExecutingAgentTool: string | null = null;
 
@@ -856,6 +865,14 @@ export function useCustomRuntime(initialMessages: ThreadMessage[] = []) {
 
                   // Handle assistant_final event
                   if (eventType === "assistant_final" || parsed.result_type) {
+                    // If we still have buffered content (no #PLAN# was detected), flush it now
+                    if (tokenBuffer && !planDetected) {
+                      addText(tokenBuffer);
+                      tokenBuffer = "";
+                      planDetected = true;
+                      console.log("📋 Frontend: Flushing buffered content (no #PLAN# detected)");
+                    }
+
                     // Append final reply without discarding earlier plan text
                     if (parsed.reply && parsed.reply.trim()) {
                       contentParts.push({ type: "text", text: parsed.reply } as ThreadAssistantMessagePart);
@@ -878,6 +895,13 @@ export function useCustomRuntime(initialMessages: ThreadMessage[] = []) {
                     }
                   }
 
+                  // Handle error event (e.g. max iterations reached)
+                  if (eventType === "error") {
+                    const errorMsg = parsed.data?.error || parsed.error || "An error occurred";
+                    console.log("❌ Frontend: Received error event:", errorMsg);
+                    contentParts.push({ type: "text", text: `\n\n#WARNING#${errorMsg}` } as ThreadAssistantMessagePart);
+                  }
+
                   // Handle done event
                   if (eventType === "done") {
                     isDone = true;
@@ -892,7 +916,43 @@ export function useCustomRuntime(initialMessages: ThreadMessage[] = []) {
                     const tokenContent = parsed.content || parsed.data?.content || "";
                     if (tokenContent) {
                       hasReceivedTokens = true;
-                      addText(tokenContent);
+
+                      // Buffer tokens until #PLAN# is detected
+                      if (!planDetected) {
+                        tokenBuffer += tokenContent;
+                        // Check if #PLAN# marker is now in the buffer
+                        const planIndex = tokenBuffer.indexOf(PLAN_MARKER);
+                        if (planIndex !== -1) {
+                          planDetected = true;
+                          // Add text starting from #PLAN# marker
+                          const textFromPlan = tokenBuffer.substring(planIndex);
+                          addText(textFromPlan);
+                          tokenBuffer = ""; // Clear buffer
+                          console.log("📋 Frontend: #PLAN# detected, starting display");
+                          // Yield immediately for first display
+                          lastTokenYieldTime = Date.now();
+                          yieldCount++;
+                          yield {
+                            content: [...contentParts],
+                            status: { type: "running" } as MessageStatus,
+                          };
+                        }
+                        // Don't yield while buffering (waiting for #PLAN#)
+                      } else {
+                        // Plan already detected, stream with typewriter effect
+                        addText(tokenContent);
+
+                        // Throttle yields for typewriter effect
+                        const now = Date.now();
+                        if (now - lastTokenYieldTime >= TOKEN_YIELD_INTERVAL_MS) {
+                          lastTokenYieldTime = now;
+                          yieldCount++;
+                          yield {
+                            content: [...contentParts],
+                            status: { type: "running" } as MessageStatus,
+                          };
+                        }
+                      }
                     }
                     continue;
                   }
@@ -901,6 +961,10 @@ export function useCustomRuntime(initialMessages: ThreadMessage[] = []) {
                   if (eventType === "final_answer") {
                     const finalContent = parsed.content || parsed.data?.content || "";
                     if (finalContent) {
+                      // Clear any buffered content since final answer replaces everything
+                      tokenBuffer = "";
+                      planDetected = true; // Mark as detected to prevent further buffering
+
                       // Remove all text parts (keep tool_calls)
                       for (let i = contentParts.length - 1; i >= 0; i--) {
                         if (contentParts[i].type === "text") {

@@ -266,6 +266,7 @@ class PlanStepState:
     status: str = "pending"
     updates: List[str] = field(default_factory=list)
     next_hint: Optional[str] = None
+    tool_hint: Optional[str] = None
 
     def add_update(self, note: str):
         if note:
@@ -289,6 +290,11 @@ class PlanTracker:
     _todo_plan_block = re.compile(r"<TODO_PLAN>(.*?)</TODO_PLAN>", re.IGNORECASE | re.DOTALL)
     _completion_pattern_template = r"step\s*{step}\b.*?(?:completed|complete|done|finished|resolved|answered)"
     _advance_pattern = re.compile(r"(?:move|moving|proceed|proceeding|next|now)\s+(?:to|onto)\s+step\s*(\d+)", re.IGNORECASE)
+    _tool_hint_pattern = re.compile(r"\[\s*tool\s*:\s*([^\]]+)\]", re.IGNORECASE)
+    _todo_snapshot_hint = (
+        "Consult todo.md before planning the next action. "
+        "Update the checklist by emitting a <TODO_STATUS> block at the end of your response."
+    )
 
     def __init__(self, base_dir: Path, context_manager: ContextManager, llm: Optional[OpenRouterLLM] = None):
         self._todo_path = base_dir / "todo.md"
@@ -381,6 +387,7 @@ class PlanTracker:
             # Only extract plans without #PLAN# if none exist yet (guarded by caller)
             plan_body = content
 
+        plan_body = self._strip_plan_metadata(plan_body)
         steps: List[PlanStepState] = []
 
         for line in plan_body.splitlines():
@@ -389,7 +396,13 @@ class PlanTracker:
                 index = int(parsed.group(1))
                 desc = parsed.group(2).strip()
                 if desc:
-                    steps.append(PlanStepState(index=index, description=desc))
+                    steps.append(
+                        PlanStepState(
+                            index=index,
+                            description=desc,
+                            tool_hint=self._extract_tool_hint(desc),
+                        )
+                    )
 
         if not steps:
             return False
@@ -572,7 +585,13 @@ class PlanTracker:
             elif dash_match:
                 desc = dash_match.group(1).strip()
             if desc:
-                steps.append(PlanStepState(index=len(steps) + 1, description=desc))
+                steps.append(
+                    PlanStepState(
+                        index=len(steps) + 1,
+                        description=desc,
+                        tool_hint=self._extract_tool_hint(desc),
+                    )
+                )
 
         if not steps:
             return False
@@ -820,6 +839,98 @@ class PlanTracker:
         if (step.status or "").lower() == "in_progress":
             return "Continue this step."
         return "Work on this step."
+
+    def build_todo_snapshot_prompt(self, reason: Optional[str] = None) -> Optional[str]:
+        """Return a user message prompt that embeds the latest todo.md snapshot."""
+        if not self._steps:
+            return None
+        snapshot = self._render_markdown()
+        prefix = self._todo_snapshot_hint
+        if reason:
+            prefix = f"{reason.strip()} - {prefix}"
+        return f"{prefix}\n\n{snapshot}"
+
+    def record_tool_result(
+        self,
+        tool_name: Optional[str],
+        result_preview: Optional[str] = None,
+        error: Optional[str] = None,
+    ) -> None:
+        """Update plan status based on a tool call outcome."""
+        if not self._steps or not tool_name:
+            return
+
+        step = self._match_step_for_tool(tool_name)
+        if not step:
+            active_step = self.get_active_or_next_step()
+            if active_step and (active_step.tool_hint or not any(s.tool_hint for s in self._steps)):
+                step = active_step
+            else:
+                step = next((s for s in self._steps if s.status != "completed" and s.tool_hint), None)
+        if not step:
+            return
+
+        normalized_tool = tool_name.strip()
+        if error:
+            note = f"Tool {normalized_tool} failed: {error}"
+            step.status = "failed"
+        else:
+            note = f"Tool {normalized_tool} completed."
+            if result_preview:
+                note = f"{note} {result_preview}"
+            if step.status != "completed":
+                step.mark_completed()
+                self._capture_completion_hint(step)
+                self._advance_active_step(step.index)
+
+        cleaned = self._clean_note(note, 240)
+        if cleaned and (not step.updates or step.updates[-1] != cleaned):
+            step.add_update(cleaned)
+        if step.status == "failed":
+            self._active_step_index = step.index
+
+        self._write_and_append_context(force_write=True, force_context=True)
+
+    def _strip_plan_metadata(self, text: str) -> str:
+        """Remove TODO blocks or tool tags before parsing plan lines."""
+        if not text:
+            return ""
+        cleaned = re.sub(r"<TODO_STATUS>.*?</TODO_STATUS>", "", text, flags=re.IGNORECASE | re.DOTALL)
+        cleaned = re.sub(r"<TODO_PLAN>.*?</TODO_PLAN>", "", cleaned, flags=re.IGNORECASE | re.DOTALL)
+        cleaned = re.sub(r"<use_mcp_tool>.*?</use_mcp_tool>", "", cleaned, flags=re.IGNORECASE | re.DOTALL)
+        return cleaned.strip()
+
+    def _extract_tool_hint(self, text: str) -> Optional[str]:
+        """Extract [tool: NAME] hint from a plan line."""
+        if not text:
+            return None
+        match = self._tool_hint_pattern.search(text)
+        if not match:
+            return None
+        raw = (match.group(1) or "").strip()
+        if not raw:
+            return None
+        raw = raw.strip("`")
+        lowered = raw.lower()
+        if lowered in {"none", "no", "no_tool", "notool", "manual"}:
+            return None
+        token = re.split(r"[,\s]+", raw, maxsplit=1)[0].strip()
+        return token or raw
+
+    def _normalize_tool_name(self, name: str) -> str:
+        return re.sub(r"\s+", "", (name or "")).lower()
+
+    def _match_step_for_tool(self, tool_name: str) -> Optional[PlanStepState]:
+        """Find the first incomplete step that explicitly names the tool."""
+        norm_tool = self._normalize_tool_name(tool_name)
+        for step in self._steps:
+            if step.status == "completed":
+                continue
+            if not step.tool_hint:
+                continue
+            if self._normalize_tool_name(step.tool_hint) == norm_tool:
+                return step
+        return None
 
 class SuperReActAgent(BaseAgent):
     """
@@ -1343,6 +1454,10 @@ class SuperReActAgent(BaseAgent):
 
         # Add chat history
         messages.extend(chat_history)
+        if plan_tracker and plan_tracker.has_plan():
+            todo_prompt = plan_tracker.build_todo_snapshot_prompt(reason=f"Turn {step_id} checklist")
+            if todo_prompt:
+                messages.append({"role": "user", "content": todo_prompt})
 
         # Get tool definitions from runtime
         # tools = runtime.get_tool_info()
@@ -1517,6 +1632,7 @@ class SuperReActAgent(BaseAgent):
             max_tool_calls_per_turn = self._agent_config.max_tool_calls_per_turn
             is_first_call = True
             task_failed = False
+            task_completed = False
             is_main_agent = (
                 getattr(self._agent_config, "agent_type", "") == "main"
                 or getattr(self._agent_config, "id", "") == "super_react_main_mcp"
@@ -1565,6 +1681,7 @@ class SuperReActAgent(BaseAgent):
                     # Check for tool calls
                     if not llm_output.tool_calls:
                         logger.info("No tool calls, task completed")
+                        task_completed = True
                         break
 
                     # Execute tool calls
@@ -1618,6 +1735,8 @@ class SuperReActAgent(BaseAgent):
                                     "iteration": iteration,
                                     "error": error_msg
                                 })
+                                if plan_tracker:
+                                    plan_tracker.record_tool_result(tool_name, error=error_msg)
                                 # Add error as tool result
                                 self._context_manager.add_tool_message(
                                     tool_call.id,
@@ -1631,6 +1750,8 @@ class SuperReActAgent(BaseAgent):
                                     "iteration": iteration,
                                     "result_preview": result_preview
                                 })
+                                if plan_tracker:
+                                    plan_tracker.record_tool_result(tool_name, result_preview=result_preview)
 
                                 # Add tool result to context immediately after execution
                                 self._context_manager.add_tool_message(
@@ -1646,6 +1767,8 @@ class SuperReActAgent(BaseAgent):
                                 "iteration": iteration,
                                 "error": str(tool_error)
                             })
+                            if plan_tracker:
+                                plan_tracker.record_tool_result(tool_name, error=str(tool_error))
 
                             # Add error as tool result so conversation can continue
                             self._context_manager.add_tool_message(
@@ -1677,9 +1800,9 @@ class SuperReActAgent(BaseAgent):
                     task_failed = True
                     break
 
-            # Check if max iterations reached
-            if iteration >= max_iteration:
-                logger.warning(f"Max iterations ({max_iteration}) reached")
+            # Check if max iterations reached without natural completion
+            if iteration >= max_iteration and not task_completed:
+                logger.warning(f"Max iterations ({max_iteration}) reached without task completion")
                 task_failed = True
 
             # Generate summary using context manager

@@ -120,10 +120,46 @@ function remarkStripPlan() {
   };
 }
 
+/**
+ * Remark plugin to strip #WARNING# sections from markdown.
+ * The WarningBanner component renders these separately.
+ */
+function remarkStripWarning() {
+  return (tree: Root) => {
+    const indicesToRemove: number[] = [];
+
+    tree.children.forEach((node, index) => {
+      let textContent = "";
+
+      if (node.type === "paragraph") {
+        textContent = (node as Paragraph).children
+          .filter((child): child is Text => child.type === "text")
+          .map((child) => child.value)
+          .join("");
+      }
+
+      if (node.type === "heading") {
+        textContent = (node as Heading).children
+          .filter((child): child is Text => child.type === "text")
+          .map((child) => child.value)
+          .join("");
+      }
+
+      if (textContent && /^#?WARNING#/i.test(textContent.trim())) {
+        indicesToRemove.push(index);
+      }
+    });
+
+    for (let i = indicesToRemove.length - 1; i >= 0; i--) {
+      tree.children.splice(indicesToRemove[i], 1);
+    }
+  };
+}
+
 const MarkdownTextImpl = () => {
   return (
     <MarkdownTextPrimitive
-      remarkPlugins={[remarkGfm, remarkStripPlan]}
+      remarkPlugins={[remarkGfm, remarkStripPlan, remarkStripWarning]}
       className="aui-md"
       components={defaultComponents}
     />

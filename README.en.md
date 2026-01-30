@@ -114,7 +114,7 @@ uv pip install browser-use==0.11.2
 
 #### 3. Configure Environment Variables
 
-Create `.env` file:
+Create `.env` file at `src/super_agent`:
 
 ```bash
 # === LLM Provider Configuration (at least one required) ===
@@ -147,6 +147,9 @@ MODEL_PROVIDER=openrouter  # Optional, default: openrouter
 ```
 
 #### 4. Start Services
+
+> ⚠️ **Before the first run, please edit `browser_start_client.ps1` or `browser_start_client.sh` and update the Chrome executable path to match the Chrome installation on your local machine.**
+
 
 **Windows:**
 ```powershell

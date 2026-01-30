@@ -38,20 +38,6 @@
 | 截图区域精准识别 | Excel 数据处理 | 跨应用多步骤工作流 | 上下文学习优化 |
 | Deep Search 深度搜索 | 文档填写提交 | 搜价、预订、下单 | 越用越聪明 |
 
----
-
-## 🎬 演示视频
-
-<!-- 在这里插入你的演示视频 -->
-
-| 演示 | 描述 |
-|------|------|
-| [🎥 Demo 1: 网页问答与截图识别](#) | 打开插件，直接针对网页内容提问；框选区域，AI 精准解读 |
-| [🎥 Demo 2: Deep Search 深度搜索](#) | 一个问题，AI 自动多轮搜索、汇总、给出完整答案 |
-| [🎥 Demo 3: 邮件与 Excel 办公](#) | 自动阅读邮件、撰写回复；处理 Excel 数据、生成报表 |
-| [🎥 Demo 4: 菜谱到购物车](#) | 理解美食视频/文章，自动打开购物 App，一键加购所有食材 |
-
----
 
 ## ✨ 核心功能
 
@@ -128,22 +114,49 @@ uv pip install browser-use==0.11.2
 
 #### 3. 配置环境变量
 
-创建 `.env` 文件：
+请在`src/super_agent`路径下创建 `.env` 文件：
 
 ```bash
-# 推荐使用 OpenRouter（支持多种模型）
-API_BASE=https://openrouter.ai/api/v1
-API_KEY=your_openrouter_api_key
-MODEL_NAME=anthropic/claude-sonnet-4-20250514
-MODEL_PROVIDER=openrouter
+# === LLM 提供商配置（至少配置一个）===
+
+# 方式一：OpenRouter（推荐，支持多种模型）
+OPENROUTER_API_KEY=your_openrouter_api_key
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1  # 可选，已有默认值
+
+# 方式二：Anthropic 直连
+# ANTHROPIC_API_KEY=your_anthropic_api_key
+# ANTHROPIC_BASE_URL=https://api.anthropic.com  # 可选，已有默认值
+
+# 方式三：OpenAI 直连
+# OPENAI_API_KEY=your_openai_api_key
+# OPENAI_BASE_URL=https://api.openai.com/v1  # 可选，已有默认值
+
+# === 模型配置 ===
+MODEL_NAME=anthropic/claude-sonnet-4-20250514  # 可选，默认 anthropic/claude-sonnet-4.5
+MODEL_PROVIDER=openrouter  # 可选，默认 openrouter
+
+# === 搜索功能（按需配置）===
+# SERPER_API_KEY=your_serper_api_key
+# GOOGLE_API_KEY=your_google_api_key
+# PERPLEXITY_API_KEY=your_perplexity_api_key
+# GEMINI_API_KEY=your_gemini_api_key
+
+# === 浏览器配置 ===
+# BROWSER_USE_CDP_URL=http://127.0.0.1:9222  # 连接远程 Chrome 时配置
+# BROWSER_USE_LLM_MODEL=google/gemini-2.5-pro  # 可选，已有默认值
 ```
 
 #### 4. 启动服务
 
+**Windows:**
 ```powershell
 # 启动
-.\start_agent.ps1# Windows PowerShell
-#./start_agent.sh # macOS / Linux（bash）
+.\start_agent.ps1
+```
+
+**macOS:**
+```bash
+./start_agent.sh 
 
 ```
 
@@ -151,13 +164,20 @@ MODEL_PROVIDER=openrouter
 
 ### 前端安装
 
-```bash
-# 1. 进入前端目录
-git clone https://github.com/xxx/frontend.git
-cd frontend
-# 2. 管理员身份启动chrome浏览器
-.\browser_start_client.ps1
+#### 打开chrome 浏览器
 
+> ⚠️ **首次使用前，请先编辑 `browser_start_client.ps1`或`browser_start_client.sh`，将其中的 Chrome 可执行文件路径修改为你本机的 Chrome 安装路径。**
+
+**Windows:**
+```powershell
+# 启动
+#
+.\browser_start_client.ps1
+```
+
+**macOS:**
+```bash
+./browser_start_client.sh
 ```
 
 #### 加载插件到浏览器
@@ -165,7 +185,7 @@ cd frontend
 1. 访问 `chrome://extensions/`
 2. 开启右上角「开发者模式」
 3. 点击「加载已解压的扩展程序」
-4. 选择 `frontend/dist` 目录
+4. 选择 `./frontend/dist` 目录
 5. 打开插件，点击设置在Backend_URL输入 http://localhost:8000
 
 ---
@@ -183,73 +203,19 @@ cd frontend
 
 ### 整体架构
 
-<!-- 在这里插入你的架构图 -->
-
-```
-[架构图占位 - 请在此插入架构图]
-```
-
-### 系统组成
-
-```
-┌────────────────────────────────────────────────────────────────────────┐
-│                        浏览器插件 (Frontend)                            │
-│  ┌────────────┐  ┌────────────┐  ┌────────────┐  ┌────────────┐       │
-│  │  网页问答   │  │  截图识别   │  │ Deep Search │  │  任务面板   │       │
-│  │  (VQA)     │  │  区域选择   │  │  深度搜索   │  │  进度追踪   │       │
-│  └─────┬──────┘  └─────┬──────┘  └─────┬──────┘  └─────┬──────┘       │
-└────────┼───────────────┼───────────────┼───────────────┼───────────────┘
-         │               │               │               │
-         ▼               ▼               ▼               ▼
-┌────────────────────────────────────────────────────────────────────────┐
-│                        Agent 服务 (Backend)                             │
-│  ┌──────────────────────────────────────────────────────────────────┐ │
-│  │                  SuperReActAgent (OpenJiuwen)                     │ │
-│  │    • 意图理解  • 任务规划  • 工具调用  • 反思演进  • 上下文管理    │ │
-│  └──────────────────────────────────────────────────────────────────┘ │
-│                                  │                                     │
-│    ┌─────────────────────────────┼─────────────────────────────┐      │
-│    │                             │                             │      │
-│    ▼                             ▼                             ▼      │
-│  ┌──────────────┐  ┌──────────────────────────┐  ┌──────────────┐    │
-│  │  🔍 智能问答  │  │      💼 协助办公          │  │ 🛒 复杂任务   │    │
-│  │  • 网页理解   │  │  • 邮件阅读/回复         │  │ • 跨应用协同  │    │
-│  │  • 截图识别   │  │  • Excel 数据处理        │  │ • 多步骤执行  │    │
-│  │  • 深度搜索   │  │                          │  │ • 购物车场景  │    │
-│  └──────────────┘  └──────────────────────────┘  └──────────────┘    │
-│                                  │                                     │
-│    ┌─────────────────────────────┴─────────────────────────────┐      │
-│    │                      🔄 自演进引擎                          │      │
-│    │     失败反思 → 上下文学习 → 策略调整 → 重新执行             │      │
-│    └───────────────────────────────────────────────────────────┘      │
-│                                  │                                     │
-│  ┌───────────┬───────────┬───────────┬───────────┬───────────┐       │
-│  │ 浏览器控制 │  视觉理解  │  搜索引擎  │  办公套件  │  代码执行  │       │
-│  │ (CDP)     │  (VLM)    │           │(邮件/Excel)│ (Python)  │       │
-│  └───────────┴───────────┴───────────┴───────────┴───────────┘       │
-└────────────────────────────────────────────────────────────────────────┘
-```
-
-
-### Browser Pilot 
-| 层级 | 组件 | 说明 |
-|------|------|------|
-| **智能体层** | SuperReActAgent | 增强的 ReAct 循环 + 自演进能力 |
-| **视觉层** | VisionModule | 网页理解、截图识别、OCR |
-| **上下文层** | ContextManager | 长对话摘要、溢出处理 |
-| **工具层** | MCP Servers | 浏览器、搜索、办公、代码执行 |
-| **接口层** | REST API | 前后端通信、SSE 流式响应 |
+<p align="center">
+  <img src="assets/架构图_zh.svg" alt="Architecture" width="800">
+</p>
 
 
 ### 技术亮点
 
 | 特点 | 描述 |
 |------|------|
-| **视觉理解** | 多模态 LLM 支持网页/截图内容理解 |
-| **ReAct 推理** | 思考 → 行动 → 观察，最多 20 轮迭代 |
-| **自演进机制** | 失败后反思原因，自动调整策略重试 |
-| **长任务支持** | 跨应用、多步骤任务编排与执行 |
-| **流式响应** | 实时展示 AI 思考过程和执行进度 |
+| **SuperReAct** | 增强的 ReAct 循环，思考 → 行动 → 观察，支持多轮迭代推理 |
+| **Browser Use** | 浏览器自动化操作，跨页面、多步骤任务执行 |
+| **反思演进** | 失败后自动反思原因，调整策略重试，越用越聪明 |
+| **多模态视觉理解** | 支持网页内容、截图区域的视觉理解与问答 |
 
 ### 支持的模型
 

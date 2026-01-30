@@ -31,6 +31,7 @@ import { MarkdownText } from "@/components/assistant-ui/markdown-text";
 import { Reasoning, ReasoningGroup } from "@/components/assistant-ui/reasoning";
 import { ToolFallback, AgentExecutionPopup } from "@/components/assistant-ui/tool-fallback";
 import { PlanSection } from "@/components/assistant-ui/PlanSection";
+import { WarningBanner } from "@/components/assistant-ui/WarningBanner";
 import { TooltipIconButton } from "@/components/assistant-ui/tooltip-icon-button";
 import {
   ComposerAttachments,
@@ -423,7 +424,7 @@ const AssistantMessage: FC = () => {
         <div className="aui-assistant-message-content mx-2 leading-7 break-words text-foreground">
           <ThinkingIndicator />
           <PlanSection content={content} />
-          {/* MarkdownText has custom filtering to hide #PLAN# section */}
+          {/* MarkdownText has custom filtering to hide #PLAN# and #WARNING# sections */}
           <MessagePrimitive.Parts
             components={{
               Text: MarkdownText,
@@ -432,6 +433,7 @@ const AssistantMessage: FC = () => {
               tools: { Fallback: ToolFallback },
             }}
           />
+          <WarningBanner content={content} />
           <MessageError />
         </div>
 
