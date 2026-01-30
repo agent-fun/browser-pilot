@@ -18,7 +18,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/python-3.12+-blue.svg" alt="Python">
-  <img src="https://img.shields.io/badge/framework-OpenJiuwen-orange.svg" alt="OpenJiuwen">
+  <img src="https://img.shields.io/badge/framework-OpenJiuwen-orange.svg" alt="openJiuwen">
   <img src="https://img.shields.io/badge/license-Apache%202.0-green.svg" alt="License">
 </p>
 
@@ -26,7 +26,7 @@
 
 ## 💡 项目简介
 
-**Browser Pilot** 是一款基于 [OpenJiuwen Agent Framework](https://gitcode.com/openJiuwen/agent-core) 构建的**浏览器智能助手插件**。它不仅具备对网页内容的深度理解能力，还能够结合用户意图进行推理、规划与执行，作为真正的 AI 助手，自动完成多步骤、跨页面的复杂任务。
+**Browser Pilot** 是一款基于 [openJiuwen Agent Framework](https://gitcode.com/openJiuwen/agent-core) 构建的**浏览器智能助手插件**。它不仅具备对网页内容的深度理解能力，还能够结合用户意图进行推理、规划与执行，作为真正的 AI 助手，自动完成多步骤、跨页面的复杂任务。
 
 > 🎯 **告诉它你想做什么，它会自己思考、执行、甚至从失败中学习。**
 
@@ -246,7 +246,7 @@ MODEL_PROVIDER=openrouter  # 可选，默认 openrouter
 
 ## 🔗 相关链接
 
-- [OpenJiuwen Agent Framework](https://gitcode.com/openJiuwen/agent-core) - 底层 Agent 框架
+- [openJiuwen Agent Framework](https://gitcode.com/openJiuwen/agent-core) - 底层 Agent 框架
 
 ---
 

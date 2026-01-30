@@ -18,7 +18,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/python-3.12+-blue.svg" alt="Python">
-  <img src="https://img.shields.io/badge/framework-OpenJiuwen-orange.svg" alt="OpenJiuwen">
+  <img src="https://img.shields.io/badge/framework-OpenJiuwen-orange.svg" alt="openJiuwen">
   <img src="https://img.shields.io/badge/license-Apache%202.0-green.svg" alt="License">
 </p>
 
@@ -26,7 +26,7 @@
 
 ## 💡 Project Overview
 
-**Browser Pilot** is an intelligent browser assistant plugin built on the [OpenJiuwen Agent Framework](https://gitcode.com/openJiuwen/agent-core). It not only deeply understands web content but also reasons, plans, and executes based on user intent — acting as a true AI copilot that automatically completes multi-step, cross-page complex tasks.
+**Browser Pilot** is an intelligent browser assistant plugin built on the [openJiuwen Agent Framework](https://gitcode.com/openJiuwen/agent-core). It not only deeply understands web content but also reasons, plans, and executes based on user intent — acting as a true AI copilot that automatically completes multi-step, cross-page complex tasks.
 
 > 🎯 **Tell it what you want to do, and it will think, execute, and even learn from failures.**
 
@@ -245,7 +245,7 @@ Contributions are welcome!
 
 ## 🔗 Related Links
 
-- [OpenJiuwen Agent Framework](https://gitcode.com/openJiuwen/agent-core) - Underlying Agent framework
+- [openJiuwen Agent Framework](https://gitcode.com/openJiuwen/agent-core) - Underlying Agent framework
 
 ---
 
