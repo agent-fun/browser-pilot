@@ -132,8 +132,8 @@ OPENROUTER_BASE_URL=https://openrouter.ai/api/v1  # 可选，已有默认值
 # OPENAI_BASE_URL=https://api.openai.com/v1  # 可选，已有默认值
 
 # === 模型配置 ===
-MODEL_NAME=anthropic/claude-sonnet-4-20250514  # 可选，默认 anthropic/claude-sonnet-4.5
-MODEL_PROVIDER=openrouter  # 可选，默认 openrouter
+MODEL_NAME = "anthropic/claude-sonnet-4.5"  # 可选，默认 anthropic/claude-sonnet-4.5
+MODEL_PROVIDER = "openrouter"  # 可选，默认 openrouter
 
 # === 搜索功能（按需配置）===
 # SERPER_API_KEY=your_serper_api_key

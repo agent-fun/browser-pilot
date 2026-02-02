@@ -132,8 +132,8 @@ OPENROUTER_BASE_URL=https://openrouter.ai/api/v1  # Optional, has default
 # OPENAI_BASE_URL=https://api.openai.com/v1  # Optional, has default
 
 # === Model Configuration ===
-MODEL_NAME=anthropic/claude-sonnet-4-20250514  # Optional, default: anthropic/claude-sonnet-4.5
-MODEL_PROVIDER=openrouter  # Optional, default: openrouter
+MODEL_NAME = "anthropic/claude-sonnet-4.5"  # Optional, default: anthropic/claude-sonnet-4.5
+MODEL_PROVIDER = "openrouter"  # Optional, default: openrouter
 
 # === Search Features (configure as needed) ===
 # SERPER_API_KEY=your_serper_api_key
