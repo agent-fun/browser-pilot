@@ -132,8 +132,8 @@ OPENROUTER_BASE_URL=https://openrouter.ai/api/v1  # 可选，已有默认值
 # OPENAI_BASE_URL=https://api.openai.com/v1  # 可选，已有默认值
 
 # === 模型配置 ===
-MODEL_NAME=anthropic/claude-sonnet-4-20250514  # 可选，默认 anthropic/claude-sonnet-4.5
-MODEL_PROVIDER=openrouter  # 可选，默认 openrouter
+MODEL_NAME = "anthropic/claude-sonnet-4.5"  # 可选，默认 anthropic/claude-sonnet-4.5
+MODEL_PROVIDER = "openrouter"  # 可选，默认 openrouter
 
 # === 搜索功能（按需配置）===
 # SERPER_API_KEY=your_serper_api_key
@@ -193,9 +193,20 @@ MODEL_PROVIDER=openrouter  # 可选，默认 openrouter
 ### 验证安装
 
 1. 确保后端服务（8930 端口 + 8000 端口）正常运行
-2. 打开任意网页
-3. 点击浏览器工具栏的 Browser Pilot 图标
-4. 输入问题，测试 AI 是否正常响应
+2. 通过browser_start_client脚本启动支持agent控制的chrome浏览器
+3. 打开任意网页或1-2个空白tab
+4. 点击浏览器工具栏的 Browser Pilot 图标
+5. 输入问题，测试 AI 是否正常响应
+
+**注：** 本项目启动时会自动安装/加载浏览器扩展（uBlock Origin, I still don't care about cookies, ClearURLs, Force Background）以提升网页自动化稳定性。扩展下载链路可能需要访问 Google 相关服务；在中国大陆网络环境下可能出现下载超时（例如 WinError 10060）导致启动失败或告警。
+
+解决方式：（任选其一）
+
+1. 配置代理环境变量（推荐）；
+
+2. 使用我们提供的离线扩展包（无需联网）；
+
+3. 禁用默认扩展（功能可用但可能造成不稳定问题，更易受广告/弹窗影响）。
 
 ---
 
